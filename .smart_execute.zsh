@@ -9,7 +9,7 @@ WHITELIST_FILE="$SMART_EXECUTE_CONFIG_DIR/whitelist.txt"
 LOG_FILE="$SMART_EXECUTE_CONFIG_DIR/log.txt"
 
 LLM_URL="http://localhost:11434/api/generate"
-LLM_MODEL="llama3"
+LLM_MODEL="gemma3:1b-it-qat"
 LLM_TIMEOUT=5
 
 # Global diziler (performans için bir kez yüklenir)
@@ -101,7 +101,7 @@ smart_accept_line() {
     suggestion=$(timeout ${LLM_TIMEOUT}s curl -s "$LLM_URL" -d '{
       "model": "'"$LLM_MODEL"'", "prompt": "'"$PROMPT"'", "stream": false
     }' 2>/dev/null | jq -r .response | tr -d '`' | sed 's/bash//g' | xargs)
-    
+
     # "Düşünüyor..." mesajını sil
     echo -ne "\r\033[K"
 
