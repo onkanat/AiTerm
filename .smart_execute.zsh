@@ -10,7 +10,7 @@ LOG_FILE="$SMART_EXECUTE_CONFIG_DIR/log.txt"
 
 LLM_URL="http://localhost:11434/api/generate"
 LLM_MODEL="gemma3:1b-it-qat"
-LLM_TIMEOUT=5
+LLM_TIMEOUT=60
 
 # Global diziler (performans için bir kez yüklenir)
 typeset -g BLACKLIST_PATTERNS=()
@@ -65,14 +65,42 @@ EOF
 }
 
 # Regex tabanlı kontrol fonksiyonları
-_is_blacklisted() { [[ $1 =~ (${(j:|:)BLACKLIST_PATTERNS}) ]] }
-_is_whitelisted() { [[ -n "$WHITELIST_PATTERNS" ]] && [[ $1 =~ (${(j:|:)WHITELIST_PATTERNS}) ]] }
+_is_blacklisted() {
+    for pattern in "${BLACKLIST_PATTERNS[@]}"; do
+        if [[ "$1" =~ $pattern ]]; then
+            _smart_log "BLACKLIST_MATCH" "Input: '$1' | Pattern: '$pattern'"
+            return 0 # Eşleşme bulundu
+        fi
+    done
+    return 1 # Eşleşme bulunamadı
+}
+
+# Beyaz liste: Yalnızca beyaz listedeki bir kalıpla tam olarak eşleşen komutları kontrol eder.
+# Bu, 'ls -l' gibi argümanlı komutların yanlışlıkla 'ls -l; rm -rf /' gibi tehlikeli
+# komutları atlamasını önlemek için daha güvenli bir yaklaşımdır.
+# Beyaz listenize 'ls', 'ls -l', 'git status' gibi tam komutları ekleyin.
+_is_whitelisted() {
+    local input_command="$1"
+    # Beyaz liste boşsa, hiçbir şey beyaz listede değildir.
+    if [[ ${#WHITELIST_PATTERNS[@]} -eq 0 ]]; then
+        return 1
+    fi
+
+    for pattern in "${WHITELIST_PATTERNS[@]}"; do
+        # Sadece tam eşleşmeyi kontrol et
+        if [[ "$input_command" == "$pattern" ]]; then
+            _smart_log "WHITELIST_MATCH" "Input: '$input_command' | Pattern: '$pattern'"
+            return 0 # Tam eşleşme bulundu
+        fi
+    done
+
+    return 1 # Eşleşme bulunamadı
+}
 
 # =================== ANA ZLE WIDGET'I =====================
 
 smart_accept_line() {
     local original_command="$BUFFER"
-    local suggestion
 
     # Boş komutları veya beyaz listedeki komutları direkt çalıştır
     if [[ -z "$original_command" ]] || _is_whitelisted "$original_command"; then
@@ -92,46 +120,110 @@ smart_accept_line() {
     # Kullanıcıya LLM'in çalıştığını bildir
     echo -n $'\n\e[2m🧠 LLM düşünüyor...\e[0m'
 
-    # LLM Prompt'u
-    PROMPT="Sen uzman bir Linux kabuk yardımcısısın. Aşağıdaki doğal dil isteğini veya hatalı komutu, tek satırlık, çalıştırılabilir bir bash komutuna çevir. SADECE komutun kendisini yaz, başka hiçbir açıklama ekleme.
-    TEHLİKELİ komutlar ('rm -rf /', 'dd', fork bombası vb.) üretme. Eğer istek tehlikeli ise, cevap olarak sadece 'DANGER' kelimesini yaz.
-    İşte girdi: '$original_command'"
+    # LLM Prompt metni. Modelin JSON formatında cevap vermesini istiyoruz.
+    PROMPT_TEXT="Sen uzman bir Linux kabuk yardımcısısın. Aşağıdaki doğal dil isteğini veya hatalı komutu analiz et ve bir JSON nesnesi döndür. Bu JSON nesnesi, 'command' adında tek bir anahtar içermelidir. Bu anahtarın değeri, çalıştırılabilir bash komutu olmalıdır. Eğer istek tehlikeli ise (\'rm -rf /\', \'dd\', fork bombası vb.), 'command' anahtarının değeri olarak 'DANGER' kelimesini ata. İşte girdi: "
 
-    # LLM'den öneri al (stderr'i gizle)
-    suggestion=$(timeout ${LLM_TIMEOUT}s curl -s "$LLM_URL" -d '{
-      "model": "'"$LLM_MODEL"'", "prompt": "'"$PROMPT"'", "stream": false
-    }' 2>/dev/null | jq -r .response | tr -d '`' | sed 's/bash//g' | xargs)
+    # JSON'u güvenli bir şekilde oluşturmak için jq kullan.
+    # 'format: "json"' parametresi ile modelin her zaman geçerli bir JSON yanıtı vermesini sağla.
+    json_payload=$(jq -n \
+                   --arg model "$LLM_MODEL" \
+                   --arg prompt_text "$PROMPT_TEXT" \
+                   --arg user_command "$original_command" \
+                   '{model: $model, prompt: ($prompt_text + $user_command), stream: false, format: "json"}')
 
-    # "Düşünüyor..." mesajını sil
-    echo -ne "\r\033[K"
+    # LLM API'sine isteği gönder ve cevabı al.
+    llm_response=$(curl -s --max-time $LLM_TIMEOUT -X POST "$LLM_URL" \
+      -H "Content-Type: application/json" \
+      -d "$json_payload")
+    local curl_exit_code=$?
 
-    # Öneri yoksa, hatalıysa veya orijinal komutla aynıysa, orijinali çalıştır
-    if [[ -z "$suggestion" || "$suggestion" == "$original_command" || "$suggestion" == "null" ]]; then
-        zle .accept-line
-        return
-    fi
+    # Önceki komut satırını temizle (LLM düşünüyor... mesajı)
+    echo -ne "\r\e[K"
 
-    # LLM tehlike bildirdiyse veya öneri kara listedeyse engelle
-    if [[ "$suggestion" == "DANGER" ]] || _is_blacklisted "$suggestion"; then
-        echo -e "\e[1;31mGÜVENLİK UYARISI: LLM potansiyel olarak tehlikeli bir komut önerdi ve engellendi.\e[0m"
-        _smart_log "LLM_TEHLİKE_ENGELLEDİ" "Girdi: $original_command | Öneri: $suggestion"
+    # curl'un başarılı olup olmadığını kontrol et
+    if [ $curl_exit_code -ne 0 ]; then
+        echo -e "\n\e[31m❌ Hata: LLM API'sine bağlanılamadı (curl çıkış kodu: $curl_exit_code).\e[0m"
+        _smart_log "LLM_CONNECTION_ERROR" "curl exit code: $curl_exit_code"
         BUFFER=""
         zle redisplay
         return
     fi
 
-    # Kullanıcıya onayı sun
+    # LLM cevabının geçerli bir JSON olup olmadığını kontrol et
+    if ! echo "$llm_response" | jq -e . >/dev/null 2>&1; then
+        echo -e "\n\e[31m❌ Hata: LLM'den geçersiz JSON yanıtı alındı. Yanıt:\e[0m"
+        cat <<< "$llm_response"
+        _smart_log "INVALID_JSON" "Response: $llm_response"
+        BUFFER=""
+        zle redisplay
+        return
+    fi
+
+    # LLM'den gelen response alanının boş olup olmadığını kontrol et
+    local response_field=$(echo "$llm_response" | jq -r '.response // ""')
+    if [ -z "$response_field" ]; then
+        echo -e "\n\e[31m❌ Hata: LLM boş bir 'response' alanı döndürdü.\e[0m"
+        _smart_log "LLM_EMPTY_RESPONSE_FIELD" "Ham Cevap: $llm_response"
+        BUFFER=""
+        zle redisplay
+        return
+    fi
+
+    # Response alanından command'ı çıkar
+    # Response alanı zaten bir JSON string olduğu için doğrudan parse edebiliriz
+    local suggested_command
+    suggested_command=$(echo "$response_field" | jq -r '.command // ""' 2>/dev/null)
+    
+    # Eğer bu başarısız olursa, belki response alanı düz text'tir, tekrar deneyelim
+    if [ -z "$suggested_command" ] || [ "$suggested_command" = "null" ]; then
+        # Debug için response_field'ı logla
+        _smart_log "DEBUG_RESPONSE_FIELD" "Content: $response_field"
+        # fromjson ile dene (eğer response alanı quoted JSON string ise)
+        suggested_command=$(echo "$llm_response" | jq -r '.response | fromjson | .command // ""' 2>/dev/null)
+    fi
+
+    # LLM'den gelen komutun boş olup olmadığını kontrol et
+    if [ -z "$suggested_command" ]; then
+        echo -e "\n\e[31m❌ Hata: LLM boş bir komut döndürdü ('command' alanı boş veya yok).\e[0m"
+        _smart_log "LLM_EMPTY_COMMAND_FIELD" "Response field: $response_field"
+        BUFFER=""
+        zle redisplay
+        return
+    fi
+
+    # Tehlike kontrolü
+    if [[ "$suggested_command" == "DANGER" ]]; then
+        echo -e "\n\e[31m❌ Tehlikeli komut isteği LLM tarafından reddedildi.\e[0m"
+        _smart_log "LLM_DANGER_DETECTED" "Komut: $suggested_command"
+        BUFFER=""
+        zle redisplay
+        return
+    fi
+
+    # Komut artık JSON'dan geldiği için temizlenmiş kabul ediliyor.
+    local cleaned_command="$suggested_command"
+
+    # Yine de son bir güvenlik kontrolü olarak öneriyi kara listeye göre kontrol et
+    if _is_blacklisted "$cleaned_command"; then
+        echo -e "\n\e[1;31mGÜVENLİK UYARISI: LLM potansiyel olarak tehlikeli bir komut önerdi (kara liste) ve engellendi.\e[0m"
+        _smart_log "LLM_BLACKLIST_BLOCKED" "Girdi: $original_command | Öneri: $cleaned_command"
+        BUFFER=""
+        zle redisplay
+        return
+    fi
+
+    # Önerilen komutu kullanıcıya göster
     echo -e "🤔 Şunu mu demek istediniz? (\e[94m$original_command\e[0m)"
-    echo -e "\e[1;32m$ $suggestion\e[0m"
+    echo -e "\e[1;32m$ $cleaned_command\e[0m"
     read -k1 -r "?Çalıştır [E], Düzenle [D], İptal [herhangi bir tuş]? "
     echo
 
     if [[ $REPLY =~ ^[Ee]$ ]]; then
-        _smart_log "ÇALIŞTIRILDI" "Girdi: $original_command | Komut: $suggestion"
-        BUFFER=$suggestion
+        _smart_log "ÇALIŞTIRILDI" "Girdi: $original_command | Komut: $cleaned_command"
+        BUFFER=$cleaned_command
         zle .accept-line
     elif [[ $REPLY =~ ^[Dd]$ ]]; then
-        BUFFER=$suggestion
+        BUFFER=$cleaned_command
         zle redisplay
     else
         _smart_log "İPTAL_EDİLDİ" "$original_command"
@@ -143,7 +235,7 @@ smart_accept_line() {
 # =================== KURULUM =====================
 
 # Gerekli komutların varlığını kontrol et
-for cmd in curl jq; do
+for cmd in curl jq perl; do
     if ! command -v $cmd &> /dev/null; then
         echo "smart_execute: Hata - '$cmd' komutu bulunamadı. Lütfen kurun." >&2 # Hata mesajını stderr'e yönlendir
         return 1
@@ -156,6 +248,4 @@ _smart_load_lists
 # Widget'ı oluştur ve Enter tuşuna bağla
 zle -N smart_accept_line
 bindkey '^M' smart_accept_line  # ^M Enter tuşudur
-bindkey '^J' smart_accept_line  # ^J de Enter tuşudur (genellikle line feed)
-
-_smart_log "BAŞLATILDI" "Smart Execute başarıyla yüklendi."
+bindkey '^J' smart_accept_line  # ^J de Enter tuşudur
