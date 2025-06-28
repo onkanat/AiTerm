@@ -2,12 +2,25 @@
 
 # =================== AYARLAR VE GLOBAL DEĞİŞKENLER =====================
 
-# Birleşik ve geliştirilmiş sistem mesajı
-SYSTEM_MESSAGE="Sen uzman bir Linux/macOS kabuk yardımcısısın. Kullanıcıdan gelen isteği analiz edip, isteğin türüne göre JSON formatında bir yanıt üreteceksin. Yanıtların daima tek bir JSON objesi olmalıdır.
-- Eğer kullanıcı bir komut istiyorsa, yanıtın {\"command\": \"üretilen_komut\"} şeklinde olmalıdır.
-- Eğer kullanıcı bir açıklama istiyorsa, yanıtın {\"explanation\": \"detaylı_açıklama\"} şeklinde olmalıdır.
-- Eğer kullanıcı isteği tehlikeli veya yıkıcı ise (rm -rf /, dd, vb.), yanıtın {\"command\": \"DANGER\"} veya {\"explanation\": \"DANGER\"} olmalıdır.
-Asla düz metin veya JSON dışında bir formatta cevap verme."
+# Geliştirilmiş ve optimize edilmiş sistem mesajı
+SYSTEM_MESSAGE="Sen Linux/macOS terminal uzmanısın. Kullanıcı isteklerini analiz edip SADECE JSON formatında yanıt veriyorsun.
+
+KRİTİK KURALLAR:
+1. SADECE JSON formatında yanıt ver, başka hiçbir şey yazma
+2. JSON objesi tek satırda olmalı, hiç yeni satır olmasın  
+3. Türkçe karakterleri doğru encode et
+
+İKİ MOD VAR:
+A) KOMUT MODU: Kullanıcı bir işlem yaptırmak istiyorsa
+   Örnek: {\"command\":\"ls -l > dosya.txt\"}
+   
+B) AÇIKLAMA MODU: Kullanıcı bir şeyin nasıl yapıldığını öğrenmek istiyorsa  
+   Örnek: {\"explanation\":\"Komut çıktısını dosyaya yazmak için '>' operatörü kullanılır. 'ls -l > liste.txt' komutu ile ls -l çıktısını liste.txt dosyasına yazar.\"}
+
+TEHLİKELİ KOMUTLAR:
+Tehlikeli isteklerde: {\"command\":\"DANGER\"} veya {\"explanation\":\"DANGER\"}
+
+HATIRLA: Tek JSON objesi, tek satır, başka hiçbir şey yazma!"
 
 # Dosya yolları ve ayarlar
 SMART_EXECUTE_CONFIG_DIR="$HOME/.config/smart_execute"
@@ -15,6 +28,7 @@ BLACKLIST_FILE="$SMART_EXECUTE_CONFIG_DIR/blacklist.txt"
 WHITELIST_FILE="$SMART_EXECUTE_CONFIG_DIR/whitelist.txt"
 LOG_FILE="$SMART_EXECUTE_CONFIG_DIR/log.txt"
 
+# OLLAMA API ayarları
 LLM_URL="http://localhost:11434/api/generate"
 LLM_MODEL="gemma3:1b-it-qat"
 LLM_TIMEOUT=60
@@ -42,13 +56,34 @@ _smart_load_lists() {
         mkdir -p "$SMART_EXECUTE_CONFIG_DIR"
         cat <<EOF > "$BLACKLIST_FILE"
 # Tehlikeli Komutlar İçin Regex Kara Listesi
-rm\s+-rf\s+/
-rm\s+-rf\s+\.\.?/
-:(){:|:&};
-dd\s+.*of=/dev/(sd|nvme).*
-mkfs.* /dev/(sd|nvme).*
-chmod\s+-R\s+777\s+/
-mv\s+.*\s+/dev/null
+rm\s+-rf\s+/  # Kök dizini silme
+rm\s+-rf\s+\.\.?/  # Üst dizinleri silme
+rm\s+-rf\s+--no-preserve-root\s+/  # Kökü korumasız silme
+:\(\)\s*{\s*:|:&;\s*};  # Fork bombası
+shutdown\b
+reboot\b
+halt\b
+poweroff\b
+chown\s+-R\s+/  # Kökün sahipliğini değiştirme
+chmod\s+-R\s+777\s+/  # Kök dizine tam yetki verme
+mv\s+.*\s+/dev/null  # Dosyaları /dev/null'a taşıma
+cp\s+/dev/zero  # /dev/zero'dan kopyalama
+cp\s+/dev/random  # /dev/random'dan kopyalama
+yes\s+>|yes\s+>>  # yes ile dosya doldurma
+>\s*/dev/sd[a-z]  # Disk üzerine yazma
+>\s*/dev/nvme[0-9]  # NVMe disk üzerine yazma
+dd\s+.*of=/dev/(sd|nvme).*  # dd ile disk üzerine yazma
+dd\s+if=/dev/zero  # dd ile sıfır yazma
+dd\s+if=/dev/random  # dd ile rastgele veri yazma
+mkfs.* /dev/(sd|nvme).*  # Disk biçimlendirme
+kill\s+-9\s+-1  # Tüm işlemleri öldürme
+killall\s+-9  # Tüm işlemleri öldürme
+ln\s+-sf\s+/dev/null  # Sembolik link ile dosya yok etme
+echo\s+>\s+/etc/passwd  # Parola dosyasını bozma
+echo\s+>\s+/etc/shadow  # Gölge parola dosyasını bozma
+userdel\b
+groupdel\b
+passwd\s+-d\b
 EOF
         while IFS= read -r line; do
             [[ -n "$line" && "$line" != \#* ]] && BLACKLIST_PATTERNS+=("$line")
@@ -65,11 +100,78 @@ EOF
         cat <<EOF > "$WHITELIST_FILE"
 # Güvenli ve sık kullanılan komutlar
 ls
+ls -l
+ls -la
 cd
 pwd
 git status
 git diff
+git log
+git pull
+git push
+git add
+git commit
+git checkout
+git branch
+git merge
+git stash
+cat
+tail
+head
+grep
+echo
+whoami
+clear
+history
 source
+which
+whereis
+man
+uname
+ps
+kill
+jobs
+bg
+fg
+export
+set
+alias
+unalias
+mkdir
+rmdir
+touch
+cp
+mv
+stat
+chmod
+chown
+find
+df
+du
+free
+uptime
+ping
+curl
+wget
+ssh
+scp
+rsync
+less
+more
+date
+diff
+sort
+uniq
+wc
+cut
+tr
+awk
+sed
+sleep
+true
+false
+printenv
+env
 EOF
         while IFS= read -r line; do
             [[ -n "$line" && "$line" != \#* ]] && WHITELIST_PATTERNS+=("$line")
@@ -101,16 +203,28 @@ _is_whitelisted() {
     return 1
 }
 
-# Merkezi LLM API Çağrı Fonksiyonu
+# Merkezi LLM API Çağrı Fonksiyonu - Optimize edilmiş
 _call_llm() {
     local user_prompt="$1"
     local mode="$2"
     local full_prompt
 
     if [[ "$mode" == "explanation" ]]; then
-        full_prompt="$SYSTEM_MESSAGE\nKullanıcı bir komutun açıklamasını istiyor. Yanıtını {\"explanation\": \"...\"} formatında ver.\nİstek: $user_prompt"
+        full_prompt="$SYSTEM_MESSAGE
+
+MOD: AÇIKLAMA MODU
+Kullanıcı bir konuyu öğrenmek istiyor. Sadece şu JSON formatında yanıt ver:
+{\"explanation\":\"Türkçe detaylı açıklama buraya\"}
+
+Kullanıcı sorusu: $user_prompt"
     else
-        full_prompt="$SYSTEM_MESSAGE\nKullanıcı bir komut istiyor. Yanıtını {\"command\": \"...\"} formatında ver.\nİstek: $user_prompt"
+        full_prompt="$SYSTEM_MESSAGE
+
+MOD: KOMUT MODU  
+Kullanıcı bir işlem yaptırmak istiyor. Sadece şu JSON formatında yanıt ver:
+{\"command\":\"uygun_komut_buraya\"}
+
+Kullanıcı isteği: $user_prompt"
     fi
 
     # Bilgilendirme mesajlarını stderr'e (> &2) göndererek yakalanmalarını önle
@@ -120,7 +234,9 @@ _call_llm() {
     json_payload=$(jq -n \
                    --arg model "$LLM_MODEL" \
                    --arg prompt "$full_prompt" \
-                   '{model: $model, prompt: $prompt, stream: false, format: "json"}')
+                   --argjson temperature 0.1 \
+                   --argjson top_p 0.9 \
+                   '{model: $model, prompt: $prompt, stream: false, format: "json", options: {temperature: $temperature, top_p: $top_p}}')
 
     local response
     response=$(curl -s --max-time $LLM_TIMEOUT -X POST "$LLM_URL" \
@@ -149,6 +265,13 @@ _call_llm() {
     if [[ -z "$response_field" ]]; then
         echo -e "\n\e[31m❌ Hata: LLM boş bir 'response' alanı döndürdü.\e[0m" >&2
         _smart_log "LLM_EMPTY_RESPONSE_FIELD" "Ham Cevap: $response"
+        return 1
+    fi
+
+    # JSON geçerliliğini kontrol et
+    if ! echo "$response_field" | jq -e . >/dev/null 2>&1; then
+        echo -e "\n\e[31m❌ Hata: LLM geçersiz JSON döndürdü.\e[0m Yanıt: $response_field" >&2
+        _smart_log "LLM_INVALID_JSON_RESPONSE" "Response: $response_field"
         return 1
     fi
 
@@ -210,15 +333,17 @@ smart_accept_line() {
 
     if [[ "$mode" == "explanation" ]]; then
         local explanation
-        explanation=$(echo "$llm_json_response" | jq -r '.explanation' 2>/dev/null)
+        explanation=$(echo "$llm_json_response" | jq -r '.explanation // empty' 2>/dev/null)
 
-        if [[ -z "$explanation" || "$explanation" == "null" ]]; then
+        if [[ -z "$explanation" ]]; then
+            # Fallback: tüm yanıtı açıklama olarak kullan
             explanation="$llm_json_response"
+            echo -e "\n\e[33m⚠️  Uyarı: LLM beklenen JSON formatında yanıt vermedi.\e[0m" >&2
         fi
 
         if [[ "$explanation" == "DANGER" ]]; then
-            echo -e "\n\e[31m❌ Hata: Geçerli bir açıklama alınamadı veya istek tehlikeli bulundu.\e[0m"
-            _smart_log "EXPLANATION_ERROR" "Response: $llm_json_response"
+            echo -e "\n\e[31m❌ Güvenlik: İstek tehlikeli bulundu ve reddedildi.\e[0m"
+            _smart_log "EXPLANATION_DANGER" "Request: $user_command"
         else
             echo -e "\n\e[1;34m🧠 Açıklama:\e[0m\n$explanation"
             _smart_log "EXPLANATION_SUCCESS" "Request: $user_command"
@@ -227,18 +352,20 @@ smart_accept_line() {
         zle redisplay
     else # command modu
         local suggested_command
-        suggested_command=$(echo "$llm_json_response" | jq -r '.command' 2>/dev/null)
-
-        if [[ -z "$suggested_command" || "$suggested_command" == "null" ]]; then
-            suggested_command="$llm_json_response"
-        fi
+        suggested_command=$(echo "$llm_json_response" | jq -r '.command // empty' 2>/dev/null)
 
         if [[ -z "$suggested_command" ]]; then
-            echo -e "\n\e[31m❌ Hata: LLM boş bir komut döndürdü.\e[0m"
-            _smart_log "LLM_EMPTY_COMMAND" "Response: $llm_json_response"
-            BUFFER=""
-            zle redisplay
-            return
+            # Fallback: tüm yanıtı komut olarak kullan (temizleyerek)
+            suggested_command=$(echo "$llm_json_response" | sed 's/^[{"]*//; s/["}]*$//; s/.*command[": ]*//; s/[",}].*$//')
+            if [[ -z "$suggested_command" ]]; then
+                echo -e "\n\e[31m❌ Hata: LLM geçerli bir komut döndürmedi.\e[0m" >&2
+                echo -e "\e[33mLLM Yanıtı:\e[0m $llm_json_response" >&2
+                _smart_log "LLM_EMPTY_COMMAND" "Response: $llm_json_response"
+                BUFFER=""
+                zle redisplay
+                return
+            fi
+            echo -e "\n\e[33m⚠️  Uyarı: LLM beklenen JSON formatında yanıt vermedi, otomatik düzeltildi.\e[0m" >&2
         fi
 
         if [[ "$suggested_command" == "DANGER" ]]; then
