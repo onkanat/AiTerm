@@ -13,6 +13,10 @@ Smart Execute, Zsh kabuğu için akıllı bir komut yorumlayıcısıdır. Doğal
 - **Kullanıcı Onayı:** LLM tarafından önerilen komutları çalıştırmadan önce kullanıcıdan onay alır.
 - **Özelleştirilebilir:** Kara liste, beyaz liste ve LLM ayarları kullanıcı tarafından kolayca yapılandırılabilir.
 - **Loglama:** Yapılan işlemleri ve karşılaşılan hataları bir log dosyasına kaydeder.
+- **Gelişmiş İndikatör Desteği:** Komutun davranışını özel öneklerle kontrol edin:
+    - `@istek`: Standart modda doğal dil isteği gönderir.
+    - `@?istek`: Bir komutun ne işe yaradığına dair LLM'den açıklama ister.
+    - `/komut`: Komutu LLM'e göndermeden doğrudan çalıştırır.
 
 ## Kurulum
 
@@ -29,10 +33,10 @@ Smart Execute, Zsh kabuğu için akıllı bir komut yorumlayıcısıdır. Doğal
     ```
 
 3.  **Gerekli Araçları Yükleyin:**
-    Smart Execute'un çalışması için `curl` ve `jq` komut satırı araçlarının sisteminizde kurulu olması gerekir. Çoğu Linux dağıtımında ve macOS'ta paket yöneticinizle kurabilirsiniz.
-    *   Debian/Ubuntu: `sudo apt update && sudo apt install curl jq`
-    *   Fedora: `sudo dnf install curl jq`
-    *   macOS (Homebrew ile): `brew install curl jq`
+    Smart Execute'un çalışması için `curl`, `jq` ve `perl` komut satırı araçlarının sisteminizde kurulu olması gerekir. Çoğu Linux dağıtımında ve macOS'ta paket yöneticinizle kurabilirsiniz.
+    *   Debian/Ubuntu: `sudo apt update && sudo apt install curl jq perl`
+    *   Fedora: `sudo dnf install curl jq perl`
+    *   macOS (Homebrew ile): `brew install curl jq perl`
 
 4.  **Terminalinizi Yeniden Başlatın:**
     `~/.zshrc` dosyasındaki değişikliklerin etkili olması için terminalinizi yeniden başlatın veya `source ~/.zshrc` komutunu çalıştırın.
@@ -43,16 +47,21 @@ Smart Execute, Zsh kabuğu için akıllı bir komut yorumlayıcısıdır. Doğal
 
 ## Kullanım
 
-Normalde Zsh'e komut girer gibi komutlarınızı yazın. Eğer komutunuz:
--   Boşsa veya beyaz listede ise, doğrudan çalıştırılır.
--   Kara listede ise, engellenir ve bir güvenlik uyarısı gösterilir.
--   Diğer durumlarda, komut LLM'e gönderilir:
-    -   LLM bir öneri sunarsa, bu öneri size gösterilir.
-        -   `E` tuşuna basarak önerilen komutu çalıştırabilirsiniz.
-        -   `D` tuşuna basarak önerilen komutu düzenleyebilirsiniz (komut satırınıza yazılır).
-        -   Başka bir tuşa basarak işlemi iptal edebilirsiniz.
-    -   LLM "DANGER" yanıtını verirse veya önerisi kara listede ise, komut engellenir.
-    -   LLM yanıt vermezse veya önerisi orijinal komutla aynıysa, orijinal komut çalıştırılır.
+Normalde Zsh'e komut girer gibi komutlarınızı yazın. Ek olarak, Smart Execute aşağıdaki özel ayrımları destekler:
+
+- `/komut` : Komut başında `/` varsa, komut LLM'e gönderilmeden doğrudan çalıştırılır.
+- `@istek` : Komut başında `@` varsa, bu bir doğal dil isteği olarak değerlendirilir ve standart JSON formatında bir yanıt beklenerek LLM'e gönderilir.
+- `@?istek`: Komutun başına `@?` koyarak, komutun kendisi yerine ne işe yaradığına dair LLM'den bir açıklama talep edebilirsiniz. (Örn: `@?ls -l | grep .txt`)
+- Diğer tüm komutlar için:
+    - Komut boşsa veya beyaz listede ise, doğrudan çalıştırılır.
+    - Kara listedeyse, engellenir ve güvenlik uyarısı gösterilir.
+    - Diğer durumlarda LLM'e gönderilir:
+        - LLM bir öneri sunarsa, bu öneri size gösterilir:
+            - `E` tuşuna basarak önerilen komutu çalıştırabilirsiniz.
+            - `D` tuşuna basarak önerilen komutu düzenleyebilirsiniz (komut satırınıza yazılır).
+            - Başka bir tuşa basarak işlemi iptal edebilirsiniz.
+        - LLM "DANGER" yanıtını verirse veya önerisi kara listede ise komut engellenir.
+        - LLM yanıt vermezse veya önerisi orijinal komutla aynıysa, orijinal komut çalıştırılır.
 
 ## Güvenlik Tedbirleri
 
@@ -67,6 +76,8 @@ Smart Execute, kullanıcıların sistemlerini yanlışlıkla veya kötü niyetli
 4.  **Kullanıcı Onayı:** LLM tarafından bir komut değişikliği önerildiğinde, bu komut otomatik olarak çalıştırılmaz. Bunun yerine, kullanıcıya önerilen komut gösterilir ve çalıştırmak, düzenlemek veya iptal etmek için bir seçenek sunulur. Bu, kullanıcının her zaman son sözü söylemesini sağlar.
 
 5.  **ZLE Widget Kullanımı:** Kod, komutları doğrudan `exec` veya `eval` ile çalıştırmak yerine Zsh Line Editor (ZLE) widget'larını kullanır. `smart_accept_line` widget'ı, Enter tuşunun varsayılan davranışını üzerine yazar. Komutlar, `zle .accept-line` aracılığıyla Zsh tarafından güvenli bir şekilde işlenir. Bu, tırnaklama ve özel karakterlerle ilgili birçok potansiyel sorunu önler ve `exec` kullanımının getirdiği terminalin kapanması gibi sorunları ortadan kaldırır.
+
+6. **İndikatörlerin Etkisi:** Kullanıcı, komutun başına özel semboller ekleyerek (örneğin `@` veya `/`), komutun nasıl işlendiğini doğrudan kontrol edebilir. Bu özellik, hem esneklik hem de öngörülebilirlik sağlar.
 
 **Önemli Güvenlik Notları:**
 
