@@ -1,5 +1,29 @@
 # Smart Execute
 
+## ⚠️ ÖNEMLI GÜVENLİK UYARISI / IMPORTANT SECURITY WARNING
+
+**Bu yazılım bir LLM (Büyük Dil Modeli) kullanarak terminal komutları üretir ve çalıştırır. Bu, potansiyel olarak TEHLİKELİ bir işlemdir.**
+
+### RİSKLER:
+- ❌ LLM tarafından üretilen komutlar sisteminize zarar verebilir
+- ❌ Veri kaybı yaşanabilir 
+- ❌ Güvenlik açıkları oluşabilir
+- ❌ Sistem dosyaları bozulabilir
+
+### SORUMLULUK REDDİ:
+- ⚠️ Bu yazılımı kullanarak **TÜM SORUMLULUĞU ÜZERİNİZE ALIYORSUNUZ**
+- ⚠️ Yazarlar hiçbir sorumluluk kabul etmez
+- ⚠️ Herhangi bir garanti verilmez
+- ⚠️ Kendi riskinizle kullanın
+
+### KULLANIM KOŞULLARI:
+- ✅ Komutları çalıştırmadan önce mutlaka kontrol edin
+- ✅ Test ortamında deneme yapın
+- ✅ Yedeklerinizi alın
+- ✅ Bu uyarıları kabul ettiğinizi onaylayın
+
+---
+
 Smart Execute, Zsh kabuğu için akıllı bir komut yorumlayıcısıdır. Doğal dil girdilerini veya hatalı komutları alır, bir LLM (Büyük Dil Modeli) aracılığıyla işler ve çalıştırılabilir bir Zsh komutuna dönüştürür. Ayrıca, tehlikeli komutların çalıştırılmasını önlemek için bir kara liste ve beyaz liste mekanizması içerir.
 
 ## Özellikler
@@ -87,3 +111,27 @@ Smart Execute, kullanıcıların sistemlerini yanlışlıkla veya kötü niyetli
 *   **Sorumluluk:** Bu araç, komut satırı deneyimini geliştirmek ve bazı riskleri azaltmak için tasarlanmıştır, ancak nihai olarak çalıştırılan komutların sorumluluğu kullanıcıya aittir.
 
 Projenin geliştirilmesi sırasında güvenlik her zaman öncelikli bir konu olmuştur ve kullanıcıların da bu araçları dikkatli ve bilinçli bir şekilde kullanmaları teşvik edilir.
+
+## Lisans ve Sorumluluk Reddi
+
+Bu proje MIT lisansı altında lisanslanmıştır. Detaylar için [LICENSE](LICENSE) dosyasına bakın.
+
+### MIT License Özeti:
+- ✅ Ticari kullanım izni
+- ✅ Değiştirme izni  
+- ✅ Dağıtım izni
+- ✅ Özel kullanım izni
+- ❌ Garanti yok
+- ❌ Sorumluluk yok
+
+**ÖNEMLI:** Bu yazılım "OLDUĞU GİBİ" sağlanır ve yazarlar hiçbir garanti vermez. Yazarlar, bu yazılımın kullanımından doğabilecek hiçbir zarar için sorumlu tutulamaz.
+
+### Katkı ve Destek
+
+Bu açık kaynak bir projedir. Katkılarınızı memnuniyetle karşılarız, ancak:
+- Hiçbir garanti verilmez
+- Teknik destek zorunluluğu yoktur  
+- Yazarlar hiçbir sorumluluk kabul etmez
+- Kullanım tamamen kendi riskinizedir
+
+**Son Uyarı:** Bu araç güçlü ve potansiyel olarak tehlikelidir. Sadece deneyimli kullanıcılar tarafından, dikkatli bir şekilde kullanılmalıdır.

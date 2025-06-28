@@ -1,5 +1,48 @@
 #!/bin/zsh
 
+# =============================================================================
+#                               UYARI / WARNING
+# =============================================================================
+# 
+# ⚠️  ÖNEMLI GÜVENLİK UYARISI / IMPORTANT SECURITY WARNING ⚠️
+#
+# Bu script bir LLM (Büyük Dil Modeli) kullanarak terminal komutları üretir.
+# This script uses an LLM (Large Language Model) to generate terminal commands.
+#
+# RİSKLER / RISKS:
+# • LLM tarafından üretilen komutlar tehlikeli olabilir
+# • LLM models may generate dangerous commands
+# • Sistem dosyalarınız zarar görebilir
+# • Your system files may be damaged
+# • Veri kaybı yaşanabilir
+# • Data loss may occur
+# • Güvenlik açıkları oluşabilir
+# • Security vulnerabilities may be created
+#
+# SORUMLULUK REDDI / DISCLAIMER:
+# • Bu scripti kullanarak TÜM SORUMLULUĞU ÜZERİNİZE ALIYORSUNUZ
+# • By using this script, you accept ALL RESPONSIBILITY
+# • Yazarlar hiçbir sorumluluk kabul etmez
+# • Authors accept no responsibility whatsoever
+# • Herhangi bir zarar için garanti verilmez
+# • No warranty is provided for any damage
+#
+# KULLANIM KOŞULLARI / TERMS OF USE:
+# • Kendi riskinizle kullanın
+# • Use at your own risk
+# • Komutları çalıştırmadan önce mutlaka kontrol edin
+# • Always review commands before executing
+# • Test ortamında deneme yapın
+# • Test in a safe environment first
+#
+# DEVAM ETMEK İSTİYORSANIZ / IF YOU WISH TO CONTINUE:
+# Bu uyarıları okuduğunuzu ve kabul ettiğinizi onaylıyorsunuz
+# You confirm that you have read and accept these warnings
+#
+# Lisans: MIT License - LICENSE dosyasına bakın
+# License: MIT License - see LICENSE file
+# =============================================================================
+
 # =================== AYARLAR VE GLOBAL DEĞİŞKENLER =====================
 
 # Geliştirilmiş ve optimize edilmiş sistem mesajı
