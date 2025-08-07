@@ -37,7 +37,7 @@ test_function_exists() {
     
     echo -n "Test ${TESTS_TOTAL}: Function $function_name exists... "
     
-    if [[ "$(type -t "$function_name")" == "function" ]]; then
+    if [[ "$(whence -w "$function_name" 2>/dev/null)" == *function* ]]; then
         echo -e "\e[32mPASS\e[0m"
         TESTS_PASSED=$((TESTS_PASSED + 1))
     else
@@ -95,7 +95,7 @@ run_tests() {
     echo "----------------------"
     
     # Test ortamı için geçici değişkenler
-    SMART_EXECUTE_CONFIG_DIR="/tmp/smart_execute_test"
+    export SMART_EXECUTE_CONFIG_DIR="/tmp/smart_execute_test"
     mkdir -p "$SMART_EXECUTE_CONFIG_DIR"
     
     # Ana dosyayı yükle
@@ -125,9 +125,9 @@ run_tests() {
     test_function_exists "_sanitize_input"
     test_function_exists "_audit_log"
     
-    # Cache modülü fonksiyonları
-    test_function_exists "_get_cached_response"
-    test_function_exists "_cache_response"
+    # Cache modülü fonksiyonları - geçici olarak devre dışı
+    # test_function_exists "_get_cached_response"
+    # test_function_exists "_cache_response"
     
     echo ""
     
@@ -136,7 +136,7 @@ run_tests() {
     echo "----------------"
     
     # Kara liste testlerini çalıştır
-    if [[ "$(type -t _is_blacklisted)" == "function" ]]; then
+    if [[ "$(whence -w _is_blacklisted 2>/dev/null)" == *function* ]]; then
         _smart_load_lists
         
         test_assert "Blacklist detects rm -rf /" "_is_blacklisted 'rm -rf /' && echo 'blocked'" "blocked"
@@ -145,7 +145,7 @@ run_tests() {
     fi
     
     # Risk değerlendirme testleri
-    if [[ "$(type -t _assess_risk)" == "function" ]]; then
+    if [[ "$(whence -w _assess_risk 2>/dev/null)" == *function* ]]; then
         test_assert "Risk assessment for safe command" "_assess_risk 'ls -la'" "0"
         # Risk skorları değişebilir, bu yüzden sayısal karşılaştırma yapmıyoruz
     fi
@@ -165,22 +165,24 @@ run_tests() {
     
     echo ""
     
-    # Cache testleri
-    echo "💾 Cache Tests"
-    echo "-------------"
+    # Cache testleri - geçici olarak devre dışı
+    echo "💾 Cache Tests (Disabled)"
+    echo "-------------------------"
+    echo "Cache sistemi geçici olarak devre dışı bırakıldı."
+    echo ""
     
-    if [[ "$(type -t _init_cache)" == "function" ]]; then
-        ENABLE_CACHE=true
-        _init_cache
-        
-        test_assert "Cache directory created" "[[ -d '$SMART_EXECUTE_CONFIG_DIR/cache' ]] && echo 'exists'" "exists"
-        
-        # Cache işlevselliğini test et
-        if [[ "$(type -t _cache_response)" == "function" ]] && [[ "$(type -t _get_cached_response)" == "function" ]]; then
-            _cache_response "test_query" "test_response"
-            test_assert "Cache stores and retrieves data" "_get_cached_response 'test_query'" "test_response"
-        fi
-    fi
+    # if [[ "$(whence -w _init_cache 2>/dev/null)" == *function* ]]; then
+    #     ENABLE_CACHE=true
+    #     _init_cache
+    #     
+    #     test_assert "Cache directory created" "[[ -d '$SMART_EXECUTE_CONFIG_DIR/cache' ]] && echo 'exists'" "exists"
+    #     
+    #     # Cache işlevselliğini test et
+    #     if [[ "$(whence -w _cache_response 2>/dev/null)" == *function* ]] && [[ "$(whence -w _get_cached_response 2>/dev/null)" == *function* ]]; then
+    #         _cache_response "test_query" "test_response"
+    #         test_assert "Cache stores and retrieves data" "_get_cached_response 'test_query'" "test_response"
+    #     fi
+    # fi
     
     echo ""
     
@@ -188,7 +190,7 @@ run_tests() {
     echo "📝 JSON Parsing Tests"
     echo "--------------------"
     
-    if [[ "$(type -t _parse_json_safely)" == "function" ]]; then
+    if [[ "$(whence -w _parse_json_safely 2>/dev/null)" == *function* ]]; then
         local test_json='{"command": "ls -la"}'
         test_assert "JSON parsing extracts command" "_parse_json_safely '$test_json' 'command'" "ls -la"
         
@@ -228,22 +230,35 @@ run_performance_tests() {
     echo "⚡ Performance Tests"
     echo "==================="
     
+    # OS uyumlu nanosaniye alma fonksiyonu
+    _get_nanoseconds() {
+        if [[ "$(uname)" == "Darwin" ]]; then # macOS
+            if command -v python3 &>/dev/null; then
+                python3 -c 'import time; print(time.time_ns())'
+            else
+                echo "$(date +%s)000000000" # Sadece saniye ile yetin
+            fi
+        else # Linux/GNU
+            date +%s%N
+        fi
+    }
+
     # Liste yükleme performansı
     echo -n "List loading performance... "
-    local start_time=$(date +%s%N)
+    local start_time=$(_get_nanoseconds)
     _smart_load_lists >/dev/null 2>&1
-    local end_time=$(date +%s%N)
+    local end_time=$(_get_nanoseconds)
     local duration=$(( (end_time - start_time) / 1000000 ))
     echo "${duration}ms"
     
     # Kara liste kontrol performansı
     if [[ ${#BLACKLIST_PATTERNS[@]} -gt 0 ]]; then
         echo -n "Blacklist check performance... "
-        local start_time=$(date +%s%N)
+        local start_time=$(_get_nanoseconds)
         for i in {1..100}; do
             _is_blacklisted "ls -la" >/dev/null 2>&1
         done
-        local end_time=$(date +%s%N)
+        local end_time=$(_get_nanoseconds)
         local duration=$(( (end_time - start_time) / 1000000 ))
         echo "${duration}ms (100 checks)"
     fi

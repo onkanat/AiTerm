@@ -46,9 +46,9 @@ Smart Execute, çoklu shell desteği olan gelişmiş bir akıllı komut yorumlay
 
 ### ⚡ Performans İyileştirmeleri
 
-- **Akıllı Cache Sistemi:** Sık kullanılan sorguları önbelleğe alır
-- **Asenkron İşlemler:** Arka plan görevleri için async desteği
 - **Optimized Parsing:** Gelişmiş JSON işleme ve hata yönetimi
+- **Asenkron İşlemler:** Arka plan görevleri için async desteği
+- **Provider Optimizasyonu:** Akıllı provider seçimi ve fallback
 
 ### 🔧 Cross-Shell Desteği
 
@@ -124,21 +124,31 @@ Smart Execute, çoklu shell desteği olan gelişmiş bir akıllı komut yorumlay
 
 ## Kullanım
 
-Normalde Zsh'e komut girer gibi komutlarınızı yazın. Ek olarak, Smart Execute aşağıdaki özel ayrımları destekler:
+Normalde Zsh'e komut girer gibi komutlarınızı yazın. Ek olarak, Smart Execute aşağıdaki özel sembolleri destekler:
 
-- `/komut` : Komut başında `/` varsa, komut LLM'e gönderilmeden doğrudan çalıştırılır.
-- `@istek` : Komut başında `@` varsa, bu bir doğal dil isteği olarak değerlendirilir ve standart JSON formatında bir yanıt beklenerek LLM'e gönderilir.
-- `@?istek`: Komutun başına `@?` koyarak, komutun kendisi yerine ne işe yaradığına dair LLM'den bir açıklama talep edebilirsiniz. (Örn: `@?ls -l | grep .txt`)
-- Diğer tüm komutlar için:
-    - Komut boşsa veya beyaz listede ise, doğrudan çalıştırılır.
-    - Kara listedeyse, engellenir ve güvenlik uyarısı gösterilir.
-    - Diğer durumlarda LLM'e gönderilir:
-        - LLM bir öneri sunarsa, bu öneri size gösterilir:
-            - `E` tuşuna basarak önerilen komutu çalıştırabilirsiniz.
-            - `D` tuşuna basarak önerilen komutu düzenleyebilirsiniz (komut satırınıza yazılır).
-            - Başka bir tuşa basarak işlemi iptal edebilirsiniz.
-        - LLM "DANGER" yanıtını verirse veya önerisi kara listede ise komut engellenir.
-        - LLM yanıt vermezse veya önerisi orijinal komutla aynıysa, orijinal komut çalıştırılır.
+- **`/komut`** : Komut başında `/` varsa, komut LLM'e gönderilmeden doğrudan çalıştırılır.
+- **`@istek`** : Komut başında `@` varsa, bu bir doğal dil isteği olarak değerlendirilir ve LLM'e gönderilir.
+- **`@?istek`**: Komutun başına `@?` koyarak, LLM'den komut hakkında açıklama talep edebilirsiniz.
+
+### Kullanım Örnekleri
+
+```bash
+# Doğal dil komut istekleri
+@dosyaları listele
+@masaüstündeki txt dosyalarını bul
+@sistem bilgilerini göster
+
+# Komut açıklamaları
+@?ls -la
+@?git status
+@?find . -name "*.txt"
+
+# Doğrudan çalıştırma
+/ls -la
+/pwd
+```
+
+Diğer tüm komutlar normal şekilde çalıştırılır. LLM'e göndermek için `@` veya `@?` öneklerini kullanın.
 
 ## Güvenlik Tedbirleri
 

@@ -11,10 +11,10 @@ xargs.*rm
 while\s+read.*rm
 
 # Fork Bombası ve Sistem Çökertme
-:\(\)\s*{\s*:|:&;\s*};
-.*/dev/urandom.*>
+:\(\).*\{
+.*\/dev\/urandom.*>
 yes.*>
-cat\s+/dev/zero\s*>
+cat\s+\/dev\/zero\s*>
 
 # Sistem Kapatma/Yeniden Başlatma
 shutdown\b

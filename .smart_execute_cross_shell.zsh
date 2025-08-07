@@ -179,7 +179,7 @@ is_command_safe() {
     [[ "$command" =~ sudo.*rm ]] && return 1
     [[ "$command" =~ dd.*of=/dev ]] && return 1
     [[ "$command" =~ chmod.*777.*/ ]] && return 1
-    [[ "$command" =~ shutdown|reboot|halt ]] && return 1
+    [[ "$command" =~ "shutdown|reboot|halt" ]] && return 1
     
     return 0
 }

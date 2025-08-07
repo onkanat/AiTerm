@@ -109,7 +109,6 @@ fi
 # Modül dosyalarını kopyala
 modules=(
     ".smart_execute_security.zsh"
-    ".smart_execute_cache.zsh"
     ".smart_execute_providers.zsh"
     ".smart_execute_cross_shell.zsh"
     ".smart_execute_wizard.zsh"

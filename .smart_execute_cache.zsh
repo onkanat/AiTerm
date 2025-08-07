@@ -1,6 +1,13 @@
 #!/bin/zsh
 # Smart Execute Cache Module
 # Bu dosya cache işlevlerini içerir
+#
+# TODO: Cache sistemi optimize edilecek
+# - Boş response döndürme sorunu çözülecek
+# - Async cache işlemleri iyileştirilecek
+# - Cache invalidation mekanizması eklenecek
+# 
+# Şu anda cache sistemi devre dışı (ENABLE_CACHE=false)
 
 # Cache yapılandırması
 CACHE_DIR="$SMART_EXECUTE_CONFIG_DIR/cache"
@@ -70,6 +77,8 @@ _cleanup_cache() {
     local current_time=$(date +%s)
     local cleaned_count=0
     
+    # Zsh nomatch hatası için güvenli glob kullanımı
+    setopt NULL_GLOB
     for cache_file in "$CACHE_DIR"/*; do
         [[ -f "$cache_file" ]] || continue
         
@@ -81,6 +90,7 @@ _cleanup_cache() {
             ((cleaned_count++))
         fi
     done
+    unsetopt NULL_GLOB
     
     [[ $cleaned_count -gt 0 ]] && _audit_log "CACHE" "CLEANUP" "Removed $cleaned_count expired entries"
 }

@@ -44,11 +44,11 @@ _assess_risk() {
     [[ "$command" =~ rm.*-r ]] && ((risk_score += 2))
     [[ "$command" =~ \> ]] && ((risk_score += 1))
     [[ "$command" =~ chmod.*777 ]] && ((risk_score += 4))
-    [[ "$command" =~ wget.*sh|curl.*sh ]] && ((risk_score += 5))
-    [[ "$command" =~ eval|exec ]] && ((risk_score += 3))
-    [[ "$command" =~ \&\&|\|\| ]] && ((risk_score += 1))
-    [[ "$command" =~ /dev/sd|/dev/nvme ]] && ((risk_score += 5))
-    [[ "$command" =~ mkfs|dd ]] && ((risk_score += 5))
+    [[ "$command" =~ "wget.*sh|curl.*sh" ]] && ((risk_score += 5))
+    [[ "$command" =~ "eval|exec" ]] && ((risk_score += 3))
+    [[ "$command" =~ "&&|\|\|" ]] && ((risk_score += 1))
+    [[ "$command" =~ "\/dev\/sd|\/dev\/nvme" ]] && ((risk_score += 5))
+    [[ "$command" =~ "mkfs|dd" ]] && ((risk_score += 5))
     
     echo $risk_score
 }
@@ -106,8 +106,16 @@ _detect_anomalies() {
     local command="$1"
     local anomaly_score=0
     
-    # Son 5 dakikada çok fazla komut
-    local recent_commands=$(grep "$(date '+%Y-%m-%d %H:%M' -d '5 minutes ago')" "$LOG_FILE" 2>/dev/null | wc -l)
+    # Son 5 dakikada çok fazla komut (macOS uyumlu)
+    local five_minutes_ago
+    if command -v gdate >/dev/null 2>&1; then
+        # GNU date (brew install coreutils)
+        five_minutes_ago=$(gdate '+%Y-%m-%d %H:%M' -d '5 minutes ago')
+    else
+        # macOS date
+        five_minutes_ago=$(date -v -5M '+%Y-%m-%d %H:%M' 2>/dev/null || date '+%Y-%m-%d %H:%M')
+    fi
+    local recent_commands=$(grep "$five_minutes_ago" "$LOG_FILE" 2>/dev/null | wc -l)
     [[ $recent_commands -gt 50 ]] && ((anomaly_score += 2))
     
     # Şüpheli komut kalıpları
