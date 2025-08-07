@@ -198,3 +198,32 @@ Bu açık kaynak bir projedir. Katkılarınızı memnuniyetle karşılarız, anc
 - Kullanım tamamen kendi riskinizedir
 
 **Son Uyarı:** Bu araç güçlü ve potansiyel olarak tehlikelidir. Sadece deneyimli kullanıcılar tarafından, dikkatli bir şekilde kullanılmalıdır.
+
+## 🚧 TODO ve Gelecek Geliştirmeler
+
+### Yüksek Öncelik
+- **Cache Sistemi Optimizasyonu**: 
+  - Boş response döndürme sorunu çözümü
+  - Async cache işlemleri iyileştirmesi  
+  - Cache invalidation mekanizması
+  - Performance testleri
+
+### Orta Öncelik
+- **UI/UX İyileştirmeleri**:
+  - Interactive komut önizleme
+  - Renkli çıktı desteği genişletme
+  - Progress indicator'ler
+
+### Düşük Öncelik  
+- **Ek Provider Desteği**:
+  - Google Gemini entegrasyonu
+  - Azure OpenAI desteği
+  - Lokal model alternatifleri
+
+### Araştırma Aşamasında
+- **Gelişmiş Güvenlik**:
+  - ML-based anomaly detection
+  - Behavioral analysis
+  - Smart sandboxing
+
+## Lisans
