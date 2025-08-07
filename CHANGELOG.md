@@ -1,5 +1,45 @@
 # Changelog - Smart Execute v2.0
 
+## v2.0.1 - Stable Release (2025-08-07)
+
+### ✅ Durum: TAM İŞLEVSEL
+Bu sürüm production kullanımı için hazır ve tüm core özellikler çalışmaktadır.
+
+### 🔧 Son Düzeltmeler ve İyileştirmeler
+
+#### Kritik Sorun Çözümleri
+- **JSON Güvenlik Açığı**: `printf` kullanımı `jq` ile değiştirildi
+- **macOS Uyumluluğu**: `date` komut uyumluluğu eklendi  
+- **Missing Function**: `_create_config_wizard` fonksiyonu eklendi
+- **Provider Parsing**: LLM response parsing sistemi iyileştirildi
+- **Debug Output**: Üretim için debug çıktıları temizlendi
+
+#### Cache Sistemi Durumu
+- **⚠️ GEÇİCİ OLARAK DEVRE DIŞI**: Cache sistemi optimize edilene kadar kapatıldı
+- **Sorun**: Boş response döndürme ve function hang sorunu
+- **TODO**: Gelecek sürümde tamamen yeniden tasarlanacak
+- **Etki**: Core functionality etkilenmedi, sadece performans optimizasyonu eksik
+
+#### Dokümantasyon Güncellemeleri
+- **README.md**: Cache durumu ve kullanım örnekleri güncellendi
+- **test.sh**: Cache testleri devre dışı bırakıldı
+- **install.sh**: Cache modülü kurulumdan çıkarıldı
+- **TODO Bölümü**: Gelecek geliştirmeler planlandı
+
+### 🎯 Çalışan Özellikler (v2.0.1)
+
+#### ✅ Tam Çalışır Durumda
+- **@komut modu**: Doğal dil komut üretimi
+- **@?komut modu**: Komut açıklamaları
+- **Çoklu Provider**: Ollama, OpenAI, Anthropic desteği
+- **Güvenlik Sistemi**: Kara liste, beyaz liste, risk analizi
+- **Cross-Shell**: Zsh, Bash, Fish desteği
+- **Setup Wizard**: İlk kurulum ve yapılandırma
+- **macOS Uyumluluğu**: Tam macOS desteği
+
+#### ⏸️ Geçici Devre Dışı
+- **Cache Sistemi**: TODO - Optimize edilecek
+
 ## v2.0.0 - Kapsamlı Güvenlik ve Özellik Güncellemesi
 
 ### 🚀 Yeni Özellikler
@@ -20,7 +60,7 @@
 - **Fallback Mekanizması**: Provider hatalarında otomatik geçiş
 
 #### Performans İyileştirmeleri
-- **Akıllı Cache Sistemi**: Sık kullanılan sorguların önbelleğe alınması
+- **~~Akıllı Cache Sistemi~~**: ⚠️ Geçici olarak devre dışı (TODO: v2.1'de optimize edilecek)
 - **Asenkron İşlemler**: Arka plan görevleri
 - **Optimize JSON Parsing**: Daha hızlı ve güvenli JSON işleme
 - **Lazy Loading**: Modüllerin ihtiyaç halinde yüklenmesi
@@ -42,7 +82,7 @@
 
 - `smart_execute_v2.zsh` - Ana gelişmiş dosya
 - `.smart_execute_security.zsh` - Güvenlik modülü
-- `.smart_execute_cache.zsh` - Cache sistemi
+- `.smart_execute_cache.zsh` - Cache sistemi (⚠️ TODO: Optimize edilecek)
 - `.smart_execute_providers.zsh` - Çoklu LLM provider desteği
 - `.smart_execute_cross_shell.zsh` - Cross-shell desteği
 - `.smart_execute_wizard.zsh` - Kurulum sihirbazı
@@ -85,10 +125,10 @@
 
 ```bash
 # Hızlı kurulum
-curl -fsSL https://raw.githubusercontent.com/user/AiTerm/master/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/onkanat/AiTerm/master/install.sh | bash
 
 # Manuel kurulum
-git clone https://github.com/user/AiTerm.git
+git clone https://github.com/onkanat/AiTerm.git
 cd AiTerm
 ./install.sh
 ```
@@ -96,13 +136,13 @@ cd AiTerm
 ### 🧪 Test
 
 ```bash
-# Tüm testleri çalıştır
+# Tüm testleri çalıştır (cache testleri devre dışı)
 ./test.sh
 
 # Sadece temel testler
 ./test.sh basic
 
-# Performans testleri
+# Performans testleri (cache hariç)
 ./test.sh performance
 ```
 
@@ -115,8 +155,8 @@ smart-execute setup
 # Durum kontrolü
 smart-execute status
 
-# Cache istatistikleri
-smart-execute cache-stats
+# Cache istatistikleri (⚠️ Şu anda devre dışı)
+# smart-execute cache-stats
 ```
 
 ### 📝 Kullanım Örnekleri
@@ -153,6 +193,10 @@ smart-execute cache-stats
 
 ### 🎯 Gelecek Planları (v2.1)
 
+- **Cache Sistemi Yeniden Tasarımı** (Yüksek Öncelik)
+  - Boş response sorunu çözümü
+  - Async cache işlemleri optimizasyonu
+  - Cache invalidation mekanizması
 - Docker/Podman sandbox desteği
 - Git hooks entegrasyonu
 - VS Code extension
@@ -169,9 +213,9 @@ smart-execute cache-stats
 
 ### 📞 Destek
 
-- GitHub Issues: https://github.com/user/AiTerm/issues
-- Wiki: https://github.com/user/AiTerm/wiki
-- Discussions: https://github.com/user/AiTerm/discussions
+- [GitHub Issues](https://github.com/onkanat/AiTerm/issues)
+- [Wiki](https://github.com/onkanat/AiTerm/wiki)  
+- [Discussions](https://github.com/onkanat/AiTerm/discussions)
 
 ---
 
