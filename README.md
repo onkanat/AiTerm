@@ -24,50 +24,103 @@
 
 ---
 
-Smart Execute, Zsh kabuğu için akıllı bir komut yorumlayıcısıdır. Doğal dil girdilerini veya hatalı komutları alır, bir LLM (Büyük Dil Modeli) aracılığıyla işler ve çalıştırılabilir bir Zsh komutuna dönüştürür. Ayrıca, tehlikeli komutların çalıştırılmasını önlemek için bir kara liste ve beyaz liste mekanizması içerir.
+Smart Execute, çoklu shell desteği olan gelişmiş bir akıllı komut yorumlayıcısıdır. Doğal dil girdilerini veya hatalı komutları alır, LLM (Büyük Dil Modeli) aracılığıyla işler ve çalıştırılabilir komutlara dönüştürür. Kapsamlı güvenlik katmanları ve gelişmiş özelliklerle donatılmıştır.
 
-## Özellikler
+## 🚀 Yeni Özellikler v2.0
 
-- **Doğal Dil Komut Anlama:** "Masaüstümdeki tüm metin dosyalarını bul" gibi doğal dil ifadelerini Zsh komutlarına çevirir.
-- **Hata Düzeltme:** Yazım hataları olan veya yanlış komutları düzelterek doğru komutu önerir.
-- **Güvenlik Filtreleri:**
-    - **Kara Liste:** Tehlikeli olduğu bilinen komut kalıplarını engelleyerek sistem güvenliğini artırır.
-    - **Beyaz Liste:** Sık kullanılan ve güvenli olduğu bilinen komutların LLM'e gönderilmeden doğrudan çalıştırılmasını sağlar, performansı artırır.
-    - **LLM Tehlike Kontrolü:** LLM tarafından üretilen potansiyel olarak tehlikeli komutları algılar ve engeller.
-- **Kullanıcı Onayı:** LLM tarafından önerilen komutları çalıştırmadan önce kullanıcıdan onay alır.
-- **Özelleştirilebilir:** Kara liste, beyaz liste ve LLM ayarları kullanıcı tarafından kolayca yapılandırılabilir.
-- **Loglama:** Yapılan işlemleri ve karşılaşılan hataları bir log dosyasına kaydeder.
-- **Gelişmiş İndikatör Desteği:** Komutun davranışını özel öneklerle kontrol edin:
-    - `@istek`: Standart modda doğal dil isteği gönderir.
-    - `@?istek`: Bir komutun ne işe yaradığına dair LLM'den açıklama ister.
-    - `/komut`: Komutu LLM'e göndermeden doğrudan çalıştırır.
+### 🔒 Gelişmiş Güvenlik
+
+- **Çok Katmanlı Güvenlik:** Kara liste, beyaz liste, risk değerlendirmesi ve anomali tespiti
+- **Risk Skorlaması:** Komutlar tehlike seviyelerine göre kategorize edilir
+- **Session Yönetimi:** Oturum zaman aşımı ve güvenlik kontrolleri
+- **Rate Limiting:** API çağrılarını sınırlayarak kötüye kullanımı önler
+- **Audit Loglama:** Detaylı güvenlik ve kullanım logları
+
+### 🤖 Çoklu LLM Desteği
+
+- **Ollama:** Yerel, ücretsiz LLM desteği
+- **OpenAI:** GPT-3.5/GPT-4 API entegrasyonu
+- **Anthropic:** Claude API desteği
+- **Akıllı Provider Seçimi:** Sorgu karmaşıklığına göre otomatik provider seçimi
+- **Fallback Mekanizması:** Bir provider başarısız olursa diğerine geçiş
+
+### ⚡ Performans İyileştirmeleri
+
+- **Akıllı Cache Sistemi:** Sık kullanılan sorguları önbelleğe alır
+- **Asenkron İşlemler:** Arka plan görevleri için async desteği
+- **Optimized Parsing:** Gelişmiş JSON işleme ve hata yönetimi
+
+### 🔧 Cross-Shell Desteği
+
+- **Zsh:** Tam destek (varsayılan)
+- **Bash:** Uyumlu key binding'ler
+- **Fish:** Özel fonksiyon desteği
+- **Universal Logic:** Shell'den bağımsız çekirdek mantık
+
+### 🎯 Kullanıcı Deneyimi
+
+- **İnteraktif Kurulum:** Adım adım yapılandırma sihirbazı
+- **Yapılandırma Yönetimi:** Güvenlik seviyeleri ve özellik bayrakları
+- **Status Dashboard:** Sistem durumu ve istatistikler
+- **Gelişmiş Hata Mesajları:** Daha açıklayıcı hata raporları
+
+## Temel Özellikler
+
+- **Doğal Dil Komut Anlama:** "Masaüstümdeki tüm metin dosyalarını bul" gibi doğal dil ifadelerini komutlara çevirir
+- **Hata Düzeltme:** Yazım hataları olan veya yanlış komutları düzelterek doğru komutu önerir
+- **Güvenlik Filtreleri:** Çok katmanlı güvenlik sistemi ile tehlikeli komutları engeller
+- **Kullanıcı Onayı:** Risk seviyesine göre kullanıcı onayı ister
+- **Özelleştirilebilir:** Tüm ayarlar kullanıcı tarafından yapılandırılabilir
+- **Gelişmiş İndikatör Desteği:**
+  - `@istek`: Standart modda doğal dil isteği gönderir
+  - `@?istek`: Bir komutun ne işe yaradığına dair LLM'den açıklama ister
+  - `/komut`: Komutu LLM'e göndermeden doğrudan çalıştırır
 
 ## Kurulum
 
-1.  **`.smart_execute.zsh` Dosyasını Edinin:**
-    *   Bu repoyu klonlayın veya `.smart_execute.zsh` dosyasını doğrudan indirin.
-    *   Dosyayı ev dizininize (`$HOME`) kopyalayın. Örneğin: `cp path/to/.smart_execute.zsh ~/.smart_execute.zsh`
+### Hızlı Kurulum (Önerilen)
 
-2.  **`~/.zshrc` Dosyanızı Düzenleyin:**
-    `~/.zshrc` dosyanızın sonuna aşağıdaki satırı ekleyin:
+1. **Smart Execute v2.0 Dosyasını İndirin:**
+   - Bu repoyu klonlayın: `git clone https://github.com/user/AiTerm.git`
+   - Veya `smart_execute_v2.zsh` dosyasını doğrudan indirin
 
-    ```zsh
-    # Akıllı komut yorumlayıcısını etkinleştir
-    source "$HOME/.smart_execute.zsh"
-    ```
+2. **Dosyayı Home Dizininize Kopyalayın:**
+   ```bash
+   cp smart_execute_v2.zsh ~/.smart_execute_v2.zsh
+   ```
 
-3.  **Gerekli Araçları Yükleyin:**
-    Smart Execute'un çalışması için `curl`, `jq` ve `perl` komut satırı araçlarının sisteminizde kurulu olması gerekir. Çoğu Linux dağıtımında ve macOS'ta paket yöneticinizle kurabilirsiniz.
-    *   Debian/Ubuntu: `sudo apt update && sudo apt install curl jq perl`
-    *   Fedora: `sudo dnf install curl jq perl`
-    *   macOS (Homebrew ile): `brew install curl jq perl`
+3. **~/.zshrc Dosyanızı Düzenleyin:**
+   ```bash
+   echo "source ~/.smart_execute_v2.zsh" >> ~/.zshrc
+   ```
 
-4.  **Terminalinizi Yeniden Başlatın:**
-    `~/.zshrc` dosyasındaki değişikliklerin etkili olması için terminalinizi yeniden başlatın veya `source ~/.zshrc` komutunu çalıştırın.
+4. **Gerekli Araçları Yükleyin:**
+   - Debian/Ubuntu: `sudo apt update && sudo apt install curl jq`
+   - Fedora: `sudo dnf install curl jq`
+   - macOS (Homebrew): `brew install curl jq`
 
-5.  **İlk Yapılandırma:**
-    *   İlk başlatmada, eğer `~/.config/smart_execute/blacklist.txt` dosyası yoksa, betik onu otomatik olarak varsayılan tehlikeli komut kalıplarıyla birlikte oluşturacaktır. Bu dizin ve dosya `$SMART_EXECUTE_CONFIG_DIR` değişkeni ile tanımlanır (varsayılan: `~/.config/smart_execute`).
-    *   (İsteğe Bağlı) `~/.config/smart_execute/whitelist.txt` dosyasını oluşturup LLM'e sormak istemediğiniz basit komutları (örneğin `ls`, `cd`, `pwd`) her satıra bir tane gelecek şekilde ekleyebilirsiniz. Bu, performansı artırır ve LLM sorgularını azaltır.
+5. **Terminali Yeniden Başlatın:**
+   ```bash
+   source ~/.zshrc
+   ```
+
+6. **Kurulum Sihirbazını Çalıştırın:**
+   ```bash
+   smart-execute setup
+   ```
+
+### Manuel Kurulum
+
+1. **Gereklilikler:**
+   - Zsh 5.0+ (Bash ve Fish için kısmi destek)
+   - curl
+   - jq
+   - Ollama (yerel LLM için) veya API anahtarları (OpenAI/Anthropic için)
+
+2. **İlk Yapılandırma:**
+   - İlk çalıştırmada yapılandırma dosyaları otomatik oluşturulur
+   - Gelişmiş kara liste otomatik yüklenir
+   - Varsayılan güvenlik ayarları uygulanır
 
 ## Kullanım
 
