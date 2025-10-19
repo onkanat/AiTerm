@@ -1,0 +1,22 @@
+{
+  "CHANGELOG.md": {
+    "fingerprint": "a85d097e47f70b63fbaf4936b210038be657c1bb",
+    "path": "/Users/hakankilicaslan/GitHub/AiTerm/CHANGELOG.md"
+  },
+  "install.sh": {
+    "fingerprint": "ca461682efeaf2b4fa473a6c7bde2f1ee2e14aee",
+    "path": "/Users/hakankilicaslan/GitHub/AiTerm/install.sh"
+  },
+  ".smart_execute_advanced_blacklist.txt": {
+    "fingerprint": "48aaff760cc5cefebb3b6b4535e628de8460dbcd",
+    "path": "/Users/hakankilicaslan/GitHub/AiTerm/.smart_execute_advanced_blacklist.txt"
+  },
+  "README.md": {
+    "fingerprint": "a8c4cde516a49f3401c7a77f4ed93be644317b8c",
+    "path": "/Users/hakankilicaslan/GitHub/AiTerm/README.md"
+  },
+  "test.sh": {
+    "fingerprint": "c8ecc026401870ffc869eb71abd2e14da2e2eedb",
+    "path": "/Users/hakankilicaslan/GitHub/AiTerm/test.sh"
+  }
+}

@@ -1,0 +1,155 @@
+# Gelişmiş Tehlikeli Komutlar İçin Regex Kara Listesi
+# Bu dosya otomatik olarak oluşturulmuştur
+
+# Dosya Sistemi Saldırıları
+rm\s+-rf\s+/
+rm\s+-rf\s+\.\.?/
+rm\s+-rf\s+--no-preserve-root\s+/
+find.*-delete
+find.*-exec.*rm
+xargs.*rm
+while\s+read.*rm
+
+# Fork Bombası ve Sistem Çökertme
+:\(\).*\{
+.*\/dev\/urandom.*>
+yes.*>
+cat\s+\/dev\/zero\s*>
+
+# Sistem Kapatma/Yeniden Başlatma
+shutdown\b
+reboot\b
+halt\b
+poweroff\b
+systemctl.*stop
+systemctl.*disable
+service.*stop
+
+# Yetki Yükseltme
+sudo\s+su
+su\s+-
+pkexec
+chmod.*4755
+chmod.*+s
+chown.*root
+
+# Disk ve Dosya Sistemi Manipülasyonu
+dd\s+.*of=/dev/(sd|nvme).*
+dd\s+if=/dev/zero
+dd\s+if=/dev/random
+mkfs.*
+fsck.*-y
+fdisk
+parted
+gparted
+
+# Ağ Saldırıları
+nc\s+-l.*-e
+netcat.*-e
+ncat.*-e
+curl.*-X\s+POST.*-d
+wget.*--post-data
+
+# Kod İnjeksiyonu ve Çalıştırma
+eval\s+\$\(
+exec\s+\$\(
+python.*-c.*exec
+perl.*-e.*exec
+ruby.*-e.*exec
+php.*-r.*exec
+bash.*-c.*\$\(
+sh.*-c.*\$\(
+
+# Dosya İzinleri ve Sahiplik
+chmod\s+-R\s+777\s+/
+chmod\s+-R\s+755\s+/etc
+chown\s+-R\s+.*\s+/
+chgrp\s+-R\s+.*\s+/
+
+# Sistem Dosyalarını Değiştirme
+echo.*>\s*/etc/passwd
+echo.*>\s*/etc/shadow
+echo.*>\s*/etc/sudoers
+echo.*>\s*/etc/hosts
+cat.*>\s*/etc/passwd
+cat.*>\s*/etc/shadow
+cp.*>\s*/etc/passwd
+mv.*>\s*/etc/passwd
+
+# Kullanıcı ve Grup Yönetimi
+userdel\b
+groupdel\b
+passwd\s+-d\b
+usermod.*-G\s+root
+usermod.*-u\s+0
+
+# Dosya ve Dizin Gizleme/Silme
+mv\s+.*\s+/dev/null
+ln\s+-sf\s+/dev/null
+shred\s+-vfz
+wipe\s+-rf
+
+# Cron ve Scheduled Tasks
+crontab\s+-r
+crontab.*rm
+at\s+.*rm
+systemctl.*timer
+
+# Process Manipulation
+kill\s+-9\s+-1
+killall\s+-9
+pkill\s+-9
+killall\s+-KILL
+
+# Memory ve Performance
+stress\s+--
+:(){ 
+ulimit\s+-c\s+unlimited
+ulimit\s+-f\s+unlimited
+
+# Backdoor ve Remote Access
+ssh.*-R
+ssh.*-L
+ssh.*-D
+nc.*-l.*-p
+socat
+
+# Data Exfiltration
+curl.*-T
+wget.*--method=PUT
+rsync.*--delete
+scp.*-r.*root@
+
+# Archive Bombs
+tar.*--exclude.*--exclude
+zip.*-r.*-9
+gzip.*-9.*-r
+
+# Binary Manipulation
+hexdump.*-C
+xxd.*-r
+objdump
+strings.*-a
+
+# Cryptography Abuse
+openssl.*-out
+gpg.*--armor
+base64.*-d.*exec
+
+# Log Manipulation
+echo.*>\s*/var/log/
+cat.*>\s*/var/log/
+truncate.*-s.*0.*log
+journalctl.*--vacuum
+
+# Container Escape
+docker.*--privileged
+docker.*-v.*:/
+podman.*--privileged
+chroot.*--userspec
+
+# Kernel Module
+modprobe
+insmod
+rmmod
+depmod

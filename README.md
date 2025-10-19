@@ -1,58 +1,154 @@
 # Smart Execute
 
-Smart Execute, Zsh kabuğu için akıllı bir komut yorumlayıcısıdır. Doğal dil girdilerini veya hatalı komutları alır, bir LLM (Büyük Dil Modeli) aracılığıyla işler ve çalıştırılabilir bir Zsh komutuna dönüştürür. Ayrıca, tehlikeli komutların çalıştırılmasını önlemek için bir kara liste ve beyaz liste mekanizması içerir.
+## ⚠️ ÖNEMLI GÜVENLİK UYARISI / IMPORTANT SECURITY WARNING
 
-## Özellikler
+**Bu yazılım bir LLM (Büyük Dil Modeli) kullanarak terminal komutları üretir ve çalıştırır. Bu, potansiyel olarak TEHLİKELİ bir işlemdir.**
 
-- **Doğal Dil Komut Anlama:** "Masaüstümdeki tüm metin dosyalarını bul" gibi doğal dil ifadelerini Zsh komutlarına çevirir.
-- **Hata Düzeltme:** Yazım hataları olan veya yanlış komutları düzelterek doğru komutu önerir.
-- **Güvenlik Filtreleri:**
-    - **Kara Liste:** Tehlikeli olduğu bilinen komut kalıplarını engelleyerek sistem güvenliğini artırır.
-    - **Beyaz Liste:** Sık kullanılan ve güvenli olduğu bilinen komutların LLM'e gönderilmeden doğrudan çalıştırılmasını sağlar, performansı artırır.
-    - **LLM Tehlike Kontrolü:** LLM tarafından üretilen potansiyel olarak tehlikeli komutları algılar ve engeller.
-- **Kullanıcı Onayı:** LLM tarafından önerilen komutları çalıştırmadan önce kullanıcıdan onay alır.
-- **Özelleştirilebilir:** Kara liste, beyaz liste ve LLM ayarları kullanıcı tarafından kolayca yapılandırılabilir.
-- **Loglama:** Yapılan işlemleri ve karşılaşılan hataları bir log dosyasına kaydeder.
+### RİSKLER:
+- ❌ LLM tarafından üretilen komutlar sisteminize zarar verebilir
+- ❌ Veri kaybı yaşanabilir 
+- ❌ Güvenlik açıkları oluşabilir
+- ❌ Sistem dosyaları bozulabilir
+
+### SORUMLULUK REDDİ:
+- ⚠️ Bu yazılımı kullanarak **TÜM SORUMLULUĞU ÜZERİNİZE ALIYORSUNUZ**
+- ⚠️ Yazarlar hiçbir sorumluluk kabul etmez
+- ⚠️ Herhangi bir garanti verilmez
+- ⚠️ Kendi riskinizle kullanın
+
+### KULLANIM KOŞULLARI:
+- ✅ Komutları çalıştırmadan önce mutlaka kontrol edin
+- ✅ Test ortamında deneme yapın
+- ✅ Yedeklerinizi alın
+- ✅ Bu uyarıları kabul ettiğinizi onaylayın
+
+---
+
+Smart Execute, çoklu shell desteği olan gelişmiş bir akıllı komut yorumlayıcısıdır. Doğal dil girdilerini veya hatalı komutları alır, LLM (Büyük Dil Modeli) aracılığıyla işler ve çalıştırılabilir komutlara dönüştürür. Kapsamlı güvenlik katmanları ve gelişmiş özelliklerle donatılmıştır.
+
+## 🚀 Yeni Özellikler v2.0
+
+### 🔒 Gelişmiş Güvenlik
+
+- **Çok Katmanlı Güvenlik:** Kara liste, beyaz liste, risk değerlendirmesi ve anomali tespiti
+- **Risk Skorlaması:** Komutlar tehlike seviyelerine göre kategorize edilir
+- **Session Yönetimi:** Oturum zaman aşımı ve güvenlik kontrolleri
+- **Rate Limiting:** API çağrılarını sınırlayarak kötüye kullanımı önler
+- **Audit Loglama:** Detaylı güvenlik ve kullanım logları
+
+### 🤖 Çoklu LLM Desteği
+
+- **Ollama:** Yerel, ücretsiz LLM desteği
+- **OpenAI:** GPT-3.5/GPT-4 API entegrasyonu
+- **Anthropic:** Claude API desteği
+- **Akıllı Provider Seçimi:** Sorgu karmaşıklığına göre otomatik provider seçimi
+- **Fallback Mekanizması:** Bir provider başarısız olursa diğerine geçiş
+
+### ⚡ Performans İyileştirmeleri
+
+- **Optimized Parsing:** Gelişmiş JSON işleme ve hata yönetimi
+- **Asenkron İşlemler:** Arka plan görevleri için async desteği
+- **Provider Optimizasyonu:** Akıllı provider seçimi ve fallback
+
+### 🔧 Cross-Shell Desteği
+
+- **Zsh:** Tam destek (varsayılan)
+- **Bash:** Uyumlu key binding'ler
+- **Fish:** Özel fonksiyon desteği
+- **Universal Logic:** Shell'den bağımsız çekirdek mantık
+
+### 🎯 Kullanıcı Deneyimi
+
+- **İnteraktif Kurulum:** Adım adım yapılandırma sihirbazı
+- **Yapılandırma Yönetimi:** Güvenlik seviyeleri ve özellik bayrakları
+- **Status Dashboard:** Sistem durumu ve istatistikler
+- **Gelişmiş Hata Mesajları:** Daha açıklayıcı hata raporları
+
+## Temel Özellikler
+
+- **Doğal Dil Komut Anlama:** "Masaüstümdeki tüm metin dosyalarını bul" gibi doğal dil ifadelerini komutlara çevirir
+- **Hata Düzeltme:** Yazım hataları olan veya yanlış komutları düzelterek doğru komutu önerir
+- **Güvenlik Filtreleri:** Çok katmanlı güvenlik sistemi ile tehlikeli komutları engeller
+- **Kullanıcı Onayı:** Risk seviyesine göre kullanıcı onayı ister
+- **Özelleştirilebilir:** Tüm ayarlar kullanıcı tarafından yapılandırılabilir
+- **Gelişmiş İndikatör Desteği:**
+  - `@istek`: Standart modda doğal dil isteği gönderir
+  - `@?istek`: Bir komutun ne işe yaradığına dair LLM'den açıklama ister
+  - `/komut`: Komutu LLM'e göndermeden doğrudan çalıştırır
 
 ## Kurulum
 
-1.  **`.smart_execute.zsh` Dosyasını Edinin:**
-    *   Bu repoyu klonlayın veya `.smart_execute.zsh` dosyasını doğrudan indirin.
-    *   Dosyayı ev dizininize (`$HOME`) kopyalayın. Örneğin: `cp path/to/.smart_execute.zsh ~/.smart_execute.zsh`
+### Hızlı Kurulum (Önerilen)
 
-2.  **`~/.zshrc` Dosyanızı Düzenleyin:**
-    `~/.zshrc` dosyanızın sonuna aşağıdaki satırı ekleyin:
+1. **Smart Execute v2.0 Dosyasını İndirin:**
+   - Bu repoyu klonlayın: `git clone https://github.com/user/AiTerm.git`
+   - Veya `smart_execute_v2.zsh` dosyasını doğrudan indirin
 
-    ```zsh
-    # Akıllı komut yorumlayıcısını etkinleştir
-    source "$HOME/.smart_execute.zsh"
-    ```
+2. **Dosyayı Home Dizininize Kopyalayın:**
+   ```bash
+   cp smart_execute_v2.zsh ~/.smart_execute_v2.zsh
+   ```
 
-3.  **Gerekli Araçları Yükleyin:**
-    Smart Execute'un çalışması için `curl` ve `jq` komut satırı araçlarının sisteminizde kurulu olması gerekir. Çoğu Linux dağıtımında ve macOS'ta paket yöneticinizle kurabilirsiniz.
-    *   Debian/Ubuntu: `sudo apt update && sudo apt install curl jq`
-    *   Fedora: `sudo dnf install curl jq`
-    *   macOS (Homebrew ile): `brew install curl jq`
+3. **~/.zshrc Dosyanızı Düzenleyin:**
+   ```bash
+   echo "source ~/.smart_execute_v2.zsh" >> ~/.zshrc
+   ```
 
-4.  **Terminalinizi Yeniden Başlatın:**
-    `~/.zshrc` dosyasındaki değişikliklerin etkili olması için terminalinizi yeniden başlatın veya `source ~/.zshrc` komutunu çalıştırın.
+4. **Gerekli Araçları Yükleyin:**
+   - Debian/Ubuntu: `sudo apt update && sudo apt install curl jq`
+   - Fedora: `sudo dnf install curl jq`
+   - macOS (Homebrew): `brew install curl jq`
 
-5.  **İlk Yapılandırma:**
-    *   İlk başlatmada, eğer `~/.config/smart_execute/blacklist.txt` dosyası yoksa, betik onu otomatik olarak varsayılan tehlikeli komut kalıplarıyla birlikte oluşturacaktır. Bu dizin ve dosya `$SMART_EXECUTE_CONFIG_DIR` değişkeni ile tanımlanır (varsayılan: `~/.config/smart_execute`).
-    *   (İsteğe Bağlı) `~/.config/smart_execute/whitelist.txt` dosyasını oluşturup LLM'e sormak istemediğiniz basit komutları (örneğin `ls`, `cd`, `pwd`) her satıra bir tane gelecek şekilde ekleyebilirsiniz. Bu, performansı artırır ve LLM sorgularını azaltır.
+5. **Terminali Yeniden Başlatın:**
+   ```bash
+   source ~/.zshrc
+   ```
+
+6. **Kurulum Sihirbazını Çalıştırın:**
+   ```bash
+   smart-execute setup
+   ```
+
+### Manuel Kurulum
+
+1. **Gereklilikler:**
+   - Zsh 5.0+ (Bash ve Fish için kısmi destek)
+   - curl
+   - jq
+   - Ollama (yerel LLM için) veya API anahtarları (OpenAI/Anthropic için)
+
+2. **İlk Yapılandırma:**
+   - İlk çalıştırmada yapılandırma dosyaları otomatik oluşturulur
+   - Gelişmiş kara liste otomatik yüklenir
+   - Varsayılan güvenlik ayarları uygulanır
 
 ## Kullanım
 
-Normalde Zsh'e komut girer gibi komutlarınızı yazın. Eğer komutunuz:
--   Boşsa veya beyaz listede ise, doğrudan çalıştırılır.
--   Kara listede ise, engellenir ve bir güvenlik uyarısı gösterilir.
--   Diğer durumlarda, komut LLM'e gönderilir:
-    -   LLM bir öneri sunarsa, bu öneri size gösterilir.
-        -   `E` tuşuna basarak önerilen komutu çalıştırabilirsiniz.
-        -   `D` tuşuna basarak önerilen komutu düzenleyebilirsiniz (komut satırınıza yazılır).
-        -   Başka bir tuşa basarak işlemi iptal edebilirsiniz.
-    -   LLM "DANGER" yanıtını verirse veya önerisi kara listede ise, komut engellenir.
-    -   LLM yanıt vermezse veya önerisi orijinal komutla aynıysa, orijinal komut çalıştırılır.
+Normalde Zsh'e komut girer gibi komutlarınızı yazın. Ek olarak, Smart Execute aşağıdaki özel sembolleri destekler:
+
+- **`/komut`** : Komut başında `/` varsa, komut LLM'e gönderilmeden doğrudan çalıştırılır.
+- **`@istek`** : Komut başında `@` varsa, bu bir doğal dil isteği olarak değerlendirilir ve LLM'e gönderilir.
+- **`@?istek`**: Komutun başına `@?` koyarak, LLM'den komut hakkında açıklama talep edebilirsiniz.
+
+### Kullanım Örnekleri
+
+```bash
+# Doğal dil komut istekleri
+@dosyaları listele
+@masaüstündeki txt dosyalarını bul
+@sistem bilgilerini göster
+
+# Komut açıklamaları
+@?ls -la
+@?git status
+@?find . -name "*.txt"
+
+# Doğrudan çalıştırma
+/ls -la
+/pwd
+```
+
+Diğer tüm komutlar normal şekilde çalıştırılır. LLM'e göndermek için `@` veya `@?` öneklerini kullanın.
 
 ## Güvenlik Tedbirleri
 
@@ -68,6 +164,8 @@ Smart Execute, kullanıcıların sistemlerini yanlışlıkla veya kötü niyetli
 
 5.  **ZLE Widget Kullanımı:** Kod, komutları doğrudan `exec` veya `eval` ile çalıştırmak yerine Zsh Line Editor (ZLE) widget'larını kullanır. `smart_accept_line` widget'ı, Enter tuşunun varsayılan davranışını üzerine yazar. Komutlar, `zle .accept-line` aracılığıyla Zsh tarafından güvenli bir şekilde işlenir. Bu, tırnaklama ve özel karakterlerle ilgili birçok potansiyel sorunu önler ve `exec` kullanımının getirdiği terminalin kapanması gibi sorunları ortadan kaldırır.
 
+6. **İndikatörlerin Etkisi:** Kullanıcı, komutun başına özel semboller ekleyerek (örneğin `@` veya `/`), komutun nasıl işlendiğini doğrudan kontrol edebilir. Bu özellik, hem esneklik hem de öngörülebilirlik sağlar.
+
 **Önemli Güvenlik Notları:**
 
 *   **LLM Güvenilirliği:** LLM'ler güçlü araçlar olsalar da, her zaman mükemmel veya tamamen güvenli çıktılar üretmeyebilirler. Smart Execute, LLM çıktılarını filtrelemek için mekanizmalar içerse de, kullanıcıların özellikle karmaşık veya sistem düzeyinde değişiklik yapan komut önerilerini dikkatlice incelemesi önerilir.
@@ -76,3 +174,56 @@ Smart Execute, kullanıcıların sistemlerini yanlışlıkla veya kötü niyetli
 *   **Sorumluluk:** Bu araç, komut satırı deneyimini geliştirmek ve bazı riskleri azaltmak için tasarlanmıştır, ancak nihai olarak çalıştırılan komutların sorumluluğu kullanıcıya aittir.
 
 Projenin geliştirilmesi sırasında güvenlik her zaman öncelikli bir konu olmuştur ve kullanıcıların da bu araçları dikkatli ve bilinçli bir şekilde kullanmaları teşvik edilir.
+
+## Lisans ve Sorumluluk Reddi
+
+Bu proje MIT lisansı altında lisanslanmıştır. Detaylar için [LICENSE](LICENSE) dosyasına bakın.
+
+### MIT License Özeti:
+- ✅ Ticari kullanım izni
+- ✅ Değiştirme izni  
+- ✅ Dağıtım izni
+- ✅ Özel kullanım izni
+- ❌ Garanti yok
+- ❌ Sorumluluk yok
+
+**ÖNEMLI:** Bu yazılım "OLDUĞU GİBİ" sağlanır ve yazarlar hiçbir garanti vermez. Yazarlar, bu yazılımın kullanımından doğabilecek hiçbir zarar için sorumlu tutulamaz.
+
+### Katkı ve Destek
+
+Bu açık kaynak bir projedir. Katkılarınızı memnuniyetle karşılarız, ancak:
+- Hiçbir garanti verilmez
+- Teknik destek zorunluluğu yoktur  
+- Yazarlar hiçbir sorumluluk kabul etmez
+- Kullanım tamamen kendi riskinizedir
+
+**Son Uyarı:** Bu araç güçlü ve potansiyel olarak tehlikelidir. Sadece deneyimli kullanıcılar tarafından, dikkatli bir şekilde kullanılmalıdır.
+
+## 🚧 TODO ve Gelecek Geliştirmeler
+
+### Yüksek Öncelik
+- **Cache Sistemi Optimizasyonu**: 
+  - Boş response döndürme sorunu çözümü
+  - Async cache işlemleri iyileştirmesi  
+  - Cache invalidation mekanizması
+  - Performance testleri
+
+### Orta Öncelik
+- **UI/UX İyileştirmeleri**:
+  - Interactive komut önizleme
+  - Renkli çıktı desteği genişletme
+  - Progress indicator'ler
+
+### Düşük Öncelik  
+- **Ek Provider Desteği**:
+  - Google Gemini entegrasyonu
+  - Azure OpenAI desteği
+  - Lokal model alternatifleri
+
+### Araştırma Aşamasında
+- **Gelişmiş Güvenlik**:
+  - ML-based anomaly detection
+  - Behavioral analysis
+  - Smart sandboxing
+
+## Lisans
