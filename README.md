@@ -80,47 +80,78 @@ Smart Execute, çoklu shell desteği olan gelişmiş bir akıllı komut yorumlay
 
 ### Hızlı Kurulum (Önerilen)
 
-1. **Smart Execute v2.0 Dosyasını İndirin:**
-   - Bu repoyu klonlayın: `git clone https://github.com/user/AiTerm.git`
-   - Veya `smart_execute_v2.zsh` dosyasını doğrudan indirin
-
-2. **Dosyayı Home Dizininize Kopyalayın:**
+1. **Depoyu Klonlayın:**
    ```bash
-   cp smart_execute_v2.zsh ~/.smart_execute_v2.zsh
+   git clone https://github.com/user/AiTerm.git
+   cd AiTerm
    ```
 
-3. **~/.zshrc Dosyanızı Düzenleyin:**
+2. **Otomatik Kurulum Script'ini Çalıştırın:**
    ```bash
-   echo "source ~/.smart_execute_v2.zsh" >> ~/.zshrc
+   ./scripts/install.sh
    ```
 
-4. **Gerekli Araçları Yükleyin:**
-   - Debian/Ubuntu: `sudo apt update && sudo apt install curl jq`
-   - Fedora: `sudo dnf install curl jq`
-   - macOS (Homebrew): `brew install curl jq`
-
-5. **Terminali Yeniden Başlatın:**
+3. **Terminali Yeniden Başlatın:**
    ```bash
-   source ~/.zshrc
+   source ~/.zshrc  # veya ~/.bashrc
    ```
 
-6. **Kurulum Sihirbazını Çalıştırın:**
+4. **Kurulum Sihirbazını Çalıştırın:**
    ```bash
    smart-execute setup
    ```
 
 ### Manuel Kurulum
 
-1. **Gereklilikler:**
-   - Zsh 5.0+ (Bash ve Fish için kısmi destek)
-   - curl
-   - jq
-   - Ollama (yerel LLM için) veya API anahtarları (OpenAI/Anthropic için)
+1. **Gerekli Araçları Yükleyin:**
+   - Debian/Ubuntu: `sudo apt update && sudo apt install curl jq`
+   - Fedora: `sudo dnf install curl jq`
+   - macOS (Homebrew): `brew install curl jq`
 
-2. **İlk Yapılandırma:**
-   - İlk çalıştırmada yapılandırma dosyaları otomatik oluşturulur
-   - Gelişmiş kara liste otomatik yüklenir
-   - Varsayılan güvenlik ayarları uygulanır
+2. **Ana Dosyayı Yükleyin:**
+   ```bash
+   source src/core/smart_execute_v2.zsh
+   ```
+
+3. **Shell Konfigürasyonunu Güncelleyin:**
+   ```bash
+   echo "source $(pwd)/src/core/smart_execute_v2.zsh" >> ~/.zshrc
+   ```
+
+### Proje Yapısı
+
+```
+AiTerm/
+├── src/                          # Ana kaynak kodları
+│   ├── core/                     # Çekirdek modüller
+│   │   └── smart_execute_v2.zsh  # Ana uygulama
+│   ├── modules/                  # Alt modüller
+│   │   ├── security.zsh          # Güvenlik modülü
+│   │   ├── providers.zsh         # LLM provider'ları
+│   │   ├── cache.zsh             # Cache sistemi
+│   │   ├── cross_shell.zsh       # Cross-shell desteği
+│   │   └── wizard.zsh            # Kurulum sihirbazı
+│   └── experimental/             # Deneysel özellikler
+├── config/                       # Konfigürasyon dosyaları
+│   ├── security.conf            # Güvenlik ayarları
+│   └── blacklist.txt            # Kara liste
+├── scripts/                      # Script'ler
+│   ├── install.sh               # Kurulum script'i
+│   └── test.sh                  # Test suite
+├── docs/                         # Dokümantasyon
+└── data/                         # Veri dosyaları
+```
+
+### Gereklilikler
+- Zsh 5.0+ (Bash ve Fish için kısmi destek)
+- curl
+- jq
+- Ollama (yerel LLM için) veya API anahtarları (OpenAI/Anthropic için)
+
+### İlk Yapılandırma
+- İlk çalıştırmada yapılandırma dosyaları otomatik oluşturulur
+- Gelişmiş kara liste otomatik yüklenir
+- Varsayılan güvenlik ayarları uygulanır
 
 ## Kullanım
 
@@ -174,6 +205,39 @@ Smart Execute, kullanıcıların sistemlerini yanlışlıkla veya kötü niyetli
 *   **Sorumluluk:** Bu araç, komut satırı deneyimini geliştirmek ve bazı riskleri azaltmak için tasarlanmıştır, ancak nihai olarak çalıştırılan komutların sorumluluğu kullanıcıya aittir.
 
 Projenin geliştirilmesi sırasında güvenlik her zaman öncelikli bir konu olmuştur ve kullanıcıların da bu araçları dikkatli ve bilinçli bir şekilde kullanmaları teşvik edilir.
+
+## Test Etme
+
+```bash
+# Tüm testleri çalıştır
+./scripts/test.sh
+
+# Sadece temel testler
+./scripts/test.sh basic
+
+# Performans testleri
+./scripts/test.sh performance
+```
+
+## Geliştirme
+
+### Geliştirici Modu
+```bash
+# Geliştirme için doğrudan yükle
+source src/core/smart_execute_v2.zsh
+
+# Deneysel özellikleri test et
+source src/experimental/enhanced_prompts.zsh
+```
+
+### Modüler Yapı
+- **src/core/**: Ana uygulama mantığı
+- **src/modules/**: Ayrıştırılmış modüller
+- **src/experimental/**: Deneysel özellikler
+- **config/**: Konfigürasyon dosyaları
+- **scripts/**: Yardımcı script'ler
+
+Daha fazla bilgi için [docs/AGENTS.md](docs/AGENTS.md) dosyasına bakın.
 
 ## Lisans ve Sorumluluk Reddi
 
