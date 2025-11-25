@@ -49,29 +49,33 @@ typeset -g WHITELIST_PATTERNS=()
 
 # =================== MODÜL YÜKLEME =====================
 
+# Modül yollarını güncelle
+SMART_EXECUTE_MODULES_DIR="$(dirname "$SMART_EXECUTE_DIR")/modules"
+SMART_EXECUTE_CONFIG_DIR="${SMART_EXECUTE_CONFIG_DIR:-$HOME/.config/smart_execute}"
+
 # Güvenlik modülü
-if [[ -f "$SMART_EXECUTE_DIR/.smart_execute_security.zsh" ]]; then
-    source "$SMART_EXECUTE_DIR/.smart_execute_security.zsh"
+if [[ -f "$SMART_EXECUTE_MODULES_DIR/security.zsh" ]]; then
+    source "$SMART_EXECUTE_MODULES_DIR/security.zsh"
 fi
 
 # Cache modülü
-if [[ -f "$SMART_EXECUTE_DIR/.smart_execute_cache.zsh" ]]; then
-    source "$SMART_EXECUTE_DIR/.smart_execute_cache.zsh"
+if [[ -f "$SMART_EXECUTE_MODULES_DIR/cache.zsh" ]]; then
+    source "$SMART_EXECUTE_MODULES_DIR/cache.zsh"
 fi
 
 # Provider modülü
-if [[ -f "$SMART_EXECUTE_DIR/.smart_execute_providers.zsh" ]]; then
-    source "$SMART_EXECUTE_DIR/.smart_execute_providers.zsh"
+if [[ -f "$SMART_EXECUTE_MODULES_DIR/providers.zsh" ]]; then
+    source "$SMART_EXECUTE_MODULES_DIR/providers.zsh"
 fi
 
 # Cross-shell desteği
-if [[ -f "$SMART_EXECUTE_DIR/.smart_execute_cross_shell.zsh" ]]; then
-    source "$SMART_EXECUTE_DIR/.smart_execute_cross_shell.zsh"
+if [[ -f "$SMART_EXECUTE_MODULES_DIR/cross_shell.zsh" ]]; then
+    source "$SMART_EXECUTE_MODULES_DIR/cross_shell.zsh"
 fi
 
 # Wizard modülü
-if [[ -f "$SMART_EXECUTE_DIR/.smart_execute_wizard.zsh" ]]; then
-    source "$SMART_EXECUTE_DIR/.smart_execute_wizard.zsh"
+if [[ -f "$SMART_EXECUTE_MODULES_DIR/wizard.zsh" ]]; then
+    source "$SMART_EXECUTE_MODULES_DIR/wizard.zsh"
 fi
 
 # =================== ANA KONFIGÜRASYON =====================
@@ -143,7 +147,12 @@ _smart_load_lists() {
     # Testlerin geçmesi için dosyanın var olduğundan emin ol
     if [[ ! -f "$BLACKLIST_FILE" ]]; then
         mkdir -p "$SMART_EXECUTE_CONFIG_DIR"
-        touch "$BLACKLIST_FILE"
+        # Eğer config klasöründe blacklist yoksa, proje config'inden kopyala
+        if [[ -f "$(dirname "$SMART_EXECUTE_DIR")/../config/blacklist.txt" ]]; then
+            cp "$(dirname "$SMART_EXECUTE_DIR")/../config/blacklist.txt" "$BLACKLIST_FILE"
+        else
+            touch "$BLACKLIST_FILE"
+        fi
     fi
     
     # Beyaz Liste

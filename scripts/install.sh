@@ -98,22 +98,23 @@ INSTALL_DIR="$HOME/.smart_execute"
 mkdir -p "$INSTALL_DIR"
 
 # Ana dosyaları kopyala
-if [[ -f "smart_execute_v2.zsh" ]]; then
-    cp smart_execute_v2.zsh "$INSTALL_DIR/"
+if [[ -f "src/core/smart_execute_v2.zsh" ]]; then
+    cp src/core/smart_execute_v2.zsh "$INSTALL_DIR/"
     echo -e "${GREEN}✓${NC} Ana dosya kopyalandı"
 else
-    echo -e "${RED}❌ smart_execute_v2.zsh bulunamadı${NC}"
+    echo -e "${RED}❌ src/core/smart_execute_v2.zsh bulunamadı${NC}"
     exit 1
 fi
 
 # Modül dosyalarını kopyala
 modules=(
-    ".smart_execute_security.zsh"
-    ".smart_execute_providers.zsh"
-    ".smart_execute_cross_shell.zsh"
-    ".smart_execute_wizard.zsh"
-    ".smart_execute_security.conf"
-    ".smart_execute_advanced_blacklist.txt"
+    "src/modules/security.zsh"
+    "src/modules/providers.zsh"
+    "src/modules/cross_shell.zsh"
+    "src/modules/wizard.zsh"
+    "src/modules/cache.zsh"
+    "config/security.conf"
+    "config/blacklist.txt"
 )
 
 for module in "${modules[@]}"; do

@@ -81,12 +81,12 @@ run_tests() {
     echo "📁 File Existence Tests"
     echo "----------------------"
     
-    test_file_exists "smart_execute_v2.zsh"
-    test_file_exists ".smart_execute_security.zsh"
-    test_file_exists ".smart_execute_cache.zsh"
-    test_file_exists ".smart_execute_providers.zsh"
-    test_file_exists ".smart_execute_wizard.zsh"
-    test_file_exists ".smart_execute_advanced_blacklist.txt"
+    test_file_exists "src/core/smart_execute_v2.zsh"
+    test_file_exists "src/modules/security.zsh"
+    test_file_exists "src/modules/cache.zsh"
+    test_file_exists "src/modules/providers.zsh"
+    test_file_exists "src/modules/wizard.zsh"
+    test_file_exists "config/blacklist.txt"
     
     echo ""
     
@@ -99,8 +99,8 @@ run_tests() {
     mkdir -p "$SMART_EXECUTE_CONFIG_DIR"
     
     # Ana dosyayı yükle
-    if [[ -f "smart_execute_v2.zsh" ]]; then
-        source "smart_execute_v2.zsh" 2>/dev/null
+    if [[ -f "src/core/smart_execute_v2.zsh" ]]; then
+        source "src/core/smart_execute_v2.zsh" 2>/dev/null
         echo "✓ Smart Execute loaded"
     else
         echo "❌ Failed to load Smart Execute"

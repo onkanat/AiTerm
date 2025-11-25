@@ -4,7 +4,7 @@
 
 # Güvenlik yapılandırmasını yükle
 _load_security_config() {
-    local config_file="$SMART_EXECUTE_CONFIG_DIR/.smart_execute_security.conf"
+    local config_file="$SMART_EXECUTE_CONFIG_DIR/security.conf"
     if [[ -f "$config_file" ]]; then
         source "$config_file"
     else
