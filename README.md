@@ -35,20 +35,22 @@ Smart Execute, çoklu shell desteği olan gelişmiş bir akıllı komut yorumlay
 - **Session Yönetimi:** Oturum zaman aşımı ve güvenlik kontrolleri
 - **Rate Limiting:** API çağrılarını sınırlayarak kötüye kullanımı önler
 - **Audit Loglama:** Detaylı güvenlik ve kullanım logları
+- **API Anahtarı Güvenliği:** Google Gemini ve diğer API anahtarları asla kodun içinde saklanmaz, çevre değişkenlerinden okunur.
 
 ### 🤖 Çoklu LLM Desteği
 
-- **Ollama:** Yerel, ücretsiz LLM desteği
-- **OpenAI:** GPT-3.5/GPT-4 API entegrasyonu
-- **Anthropic:** Claude API desteği
-- **Akıllı Provider Seçimi:** Sorgu karmaşıklığına göre otomatik provider seçimi
-- **Fallback Mekanizması:** Bir provider başarısız olursa diğerine geçiş
+- **Google Gemini (Yeni!):** Google One Pro aboneliği ile **Gemini 3.1 Pro Preview** desteği. En güçlü "Complex" provider.
+- **Ollama:** Yerel, ücretsiz LLM desteği (Local ve Remote/Network desteği).
+- **OpenAI:** GPT-3.5/GPT-4 API entegrasyonu.
+- **Anthropic:** Claude API desteği.
+- **Akıllı Provider Seçimi:** Sorgu karmaşıklığına göre otomatik provider seçimi. Basit işler için Ollama, karmaşık işler için Gemini kullanılır.
+- **Fallback Mekanizması:** Bir provider başarısız olursa otomatik olarak yerel veya ağdaki Ollama'ya geçiş.
 
 ### ⚡ Performans İyileştirmeleri
 
-- **Optimized Parsing:** Gelişmiş JSON işleme ve hata yönetimi
-- **Asenkron İşlemler:** Arka plan görevleri için async desteği
-- **Provider Optimizasyonu:** Akıllı provider seçimi ve fallback
+- **Optimized Parsing:** Gelişmiş JSON işleme (Gemini v1beta desteği dahil) ve hata yönetimi.
+- **Smart Network Support:** Yerel ağdaki (LAN) Ollama sunucularını fallback olarak kullanabilme.
+- **Provider Optimizasyonu:** Akıllı provider seçimi ve fallback.
 
 ### 🔧 Cross-Shell Desteği
 
@@ -72,7 +74,7 @@ Smart Execute, çoklu shell desteği olan gelişmiş bir akıllı komut yorumlay
 - **Kullanıcı Onayı:** Risk seviyesine göre kullanıcı onayı ister
 - **Özelleştirilebilir:** Tüm ayarlar kullanıcı tarafından yapılandırılabilir
 - **Gelişmiş İndikatör Desteği:**
-  - `@istek`: Standart modda doğal dil isteği gönderir
+  - `@istek`: Standart modda doğal dil isteği gönderir (Basit işlerde Ollama, karmaşık işlerde Gemini kullanılır).
   - `@?istek`: Bir komutun ne işe yaradığına dair LLM'den açıklama ister
   - `/komut`: Komutu LLM'e göndermeden doğrudan çalıştırır
 
@@ -146,7 +148,8 @@ AiTerm/
 - Zsh 5.0+ (Bash ve Fish için kısmi destek)
 - curl
 - jq
-- Ollama (yerel LLM için) veya API anahtarları (OpenAI/Anthropic için)
+- Ollama (yerel LLM için)
+- **Gemini API Key:** `$GEMINI_API_KEY` çevre değişkeni üzerinden Google One AI Pro desteği.
 
 ### İlk Yapılandırma
 - İlk çalıştırmada yapılandırma dosyaları otomatik oluşturulur
@@ -165,8 +168,8 @@ Normalde Zsh'e komut girer gibi komutlarınızı yazın. Ek olarak, Smart Execut
 
 ```bash
 # Doğal dil komut istekleri
-@dosyaları listele
-@masaüstündeki txt dosyalarını bul
+@dosyaları listele (Ollama ile hızlı yanıt)
+@masaüstündeki txt dosyalarını bul ve hepsini tek bir pdf yap (Gemini 3.1 Pro ile karmaşık işlem)
 @sistem bilgilerini göster
 
 # Komut açıklamaları
@@ -193,9 +196,11 @@ Smart Execute, kullanıcıların sistemlerini yanlışlıkla veya kötü niyetli
 
 4.  **Kullanıcı Onayı:** LLM tarafından bir komut değişikliği önerildiğinde, bu komut otomatik olarak çalıştırılmaz. Bunun yerine, kullanıcıya önerilen komut gösterilir ve çalıştırmak, düzenlemek veya iptal etmek için bir seçenek sunulur. Bu, kullanıcının her zaman son sözü söylemesini sağlar.
 
-5.  **ZLE Widget Kullanımı:** Kod, komutları doğrudan `exec` veya `eval` ile çalıştırmak yerine Zsh Line Editor (ZLE) widget'larını kullanır. `smart_accept_line` widget'ı, Enter tuşunun varsayılan davranışını üzerine yazar. Komutlar, `zle .accept-line` aracılığıyla Zsh tarafından güvenli bir şekilde işlenir. Bu, tırnaklama ve özel karakterlerle ilgili birçok potansiyel sorunu önler ve `exec` kullanımının getirdiği terminalin kapanması gibi sorunları ortadan kaldırır.
+5.  **ZLE Widget Kullanımı:** Kod, komutları doğrudan `exec` veya `eval` ile çalıştırmak yerine Zsh Line Editor (ZLE) widget'larını kullanır. `smart_accept_line` widget'ı, Enter tuşunun varsayılan davranışını üzerine yazar. Komutlar, `zle .accept-line` aracılığıyla Zsh tarafından güvenli bir şekilde işlenir. Bu, tırnaklama ve özel karakterlerle ilgili many potansiyel sorunu önler ve `exec` kullanımının getirdiği terminalin kapanması gibi sorunları ortadan kaldırır.
 
 6. **İndikatörlerin Etkisi:** Kullanıcı, komutun başına özel semboller ekleyerek (örneğin `@` veya `/`), komutun nasıl işlendiğini doğrudan kontrol edebilir. Bu özellik, hem esneklik hem de öngörülebilirlik sağlar.
+
+7. **API Anahtarı Güvenliği:** Google Gemini ve diğer API anahtarları asla kodun içinde saklanmaz. Sadece çevre değişkenleri (`$GEMINI_API_KEY`) üzerinden okunur, bu da projenin GitHub'da güvenle paylaşılmasını sağlar.
 
 **Önemli Güvenlik Notları:**
 
@@ -280,7 +285,6 @@ Bu açık kaynak bir projedir. Katkılarınızı memnuniyetle karşılarız, anc
 
 ### Düşük Öncelik  
 - **Ek Provider Desteği**:
-  - Google Gemini entegrasyonu
   - Azure OpenAI desteği
   - Lokal model alternatifleri
 

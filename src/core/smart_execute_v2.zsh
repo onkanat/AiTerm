@@ -23,7 +23,7 @@
 # YENİ ÖZELLİKLER v2.0:
 # • Gelişmiş güvenlik katmanları
 # • Çoklu LLM provider desteği
-# • Cache sistemi (TODO: Optimize edilecek, şu anda devre dışı)
+# • Cache sistemi
 # • Anomali tespiti
 # • Cross-shell desteği
 # • Risk değerlendirmesi
@@ -49,33 +49,29 @@ typeset -g WHITELIST_PATTERNS=()
 
 # =================== MODÜL YÜKLEME =====================
 
-# Modül yollarını güncelle
-SMART_EXECUTE_MODULES_DIR="$(dirname "$SMART_EXECUTE_DIR")/modules"
-SMART_EXECUTE_CONFIG_DIR="${SMART_EXECUTE_CONFIG_DIR:-$HOME/.config/smart_execute}"
-
 # Güvenlik modülü
-if [[ -f "$SMART_EXECUTE_MODULES_DIR/security.zsh" ]]; then
-    source "$SMART_EXECUTE_MODULES_DIR/security.zsh"
+if [[ -f "$SMART_EXECUTE_DIR/.smart_execute_security.zsh" ]]; then
+    source "$SMART_EXECUTE_DIR/.smart_execute_security.zsh"
 fi
 
 # Cache modülü
-if [[ -f "$SMART_EXECUTE_MODULES_DIR/cache.zsh" ]]; then
-    source "$SMART_EXECUTE_MODULES_DIR/cache.zsh"
+if [[ -f "$SMART_EXECUTE_DIR/.smart_execute_cache.zsh" ]]; then
+    source "$SMART_EXECUTE_DIR/.smart_execute_cache.zsh"
 fi
 
 # Provider modülü
-if [[ -f "$SMART_EXECUTE_MODULES_DIR/providers.zsh" ]]; then
-    source "$SMART_EXECUTE_MODULES_DIR/providers.zsh"
+if [[ -f "$SMART_EXECUTE_DIR/.smart_execute_providers.zsh" ]]; then
+    source "$SMART_EXECUTE_DIR/.smart_execute_providers.zsh"
 fi
 
 # Cross-shell desteği
-if [[ -f "$SMART_EXECUTE_MODULES_DIR/cross_shell.zsh" ]]; then
-    source "$SMART_EXECUTE_MODULES_DIR/cross_shell.zsh"
+if [[ -f "$SMART_EXECUTE_DIR/.smart_execute_cross_shell.zsh" ]]; then
+    source "$SMART_EXECUTE_DIR/.smart_execute_cross_shell.zsh"
 fi
 
 # Wizard modülü
-if [[ -f "$SMART_EXECUTE_MODULES_DIR/wizard.zsh" ]]; then
-    source "$SMART_EXECUTE_MODULES_DIR/wizard.zsh"
+if [[ -f "$SMART_EXECUTE_DIR/.smart_execute_wizard.zsh" ]]; then
+    source "$SMART_EXECUTE_DIR/.smart_execute_wizard.zsh"
 fi
 
 # =================== ANA KONFIGÜRASYON =====================
@@ -147,12 +143,7 @@ _smart_load_lists() {
     # Testlerin geçmesi için dosyanın var olduğundan emin ol
     if [[ ! -f "$BLACKLIST_FILE" ]]; then
         mkdir -p "$SMART_EXECUTE_CONFIG_DIR"
-        # Eğer config klasöründe blacklist yoksa, proje config'inden kopyala
-        if [[ -f "$(dirname "$SMART_EXECUTE_DIR")/../config/blacklist.txt" ]]; then
-            cp "$(dirname "$SMART_EXECUTE_DIR")/../config/blacklist.txt" "$BLACKLIST_FILE"
-        else
-            touch "$BLACKLIST_FILE"
-        fi
+        touch "$BLACKLIST_FILE"
     fi
     
     # Beyaz Liste
@@ -270,6 +261,15 @@ _call_llm() {
         full_prompt="$SYSTEM_MESSAGE\nKullanıcı bir komut istiyor. Yanıtını {\"command\": \"...\"} formatında ver.\nİstek: $user_prompt"
     fi
 
+    # Cache kontrolü
+    if [[ "$(whence -w _get_cached_response 2>/dev/null)" == *function* ]]; then
+        local cached_response=$(_get_cached_response "$full_prompt")
+        if [[ $? -eq 0 ]]; then
+            echo "$cached_response"
+            return 0
+        fi
+    fi
+
     # Multi-provider desteği
     local response
     if [[ "$(whence -w _call_llm_with_fallback 2>/dev/null)" == *function* ]]; then
@@ -340,10 +340,10 @@ _call_llm() {
         fi
     fi
 
-    # Cache'e kaydet - cache devre dışı
-    # if [[ "$(whence -w _cache_response 2>/dev/null)" == *function* ]]; then
-    #     _cache_response "$full_prompt" "$response_field"
-    # fi
+    # Cache'e kaydet
+    if [[ "$(whence -w _cache_response 2>/dev/null)" == *function* ]]; then
+        _cache_response "$full_prompt" "$response_field"
+    fi
 
     # Output sanitization
     if [[ "$(whence -w _sanitize_output 2>/dev/null)" == *function* ]]; then

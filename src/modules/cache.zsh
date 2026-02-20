@@ -1,13 +1,6 @@
 #!/bin/zsh
 # Smart Execute Cache Module
 # Bu dosya cache işlevlerini içerir
-#
-# TODO: Cache sistemi optimize edilecek
-# - Boş response döndürme sorunu çözülecek
-# - Async cache işlemleri iyileştirilecek
-# - Cache invalidation mekanizması eklenecek
-# 
-# Şu anda cache sistemi devre dışı (ENABLE_CACHE=false)
 
 # Cache yapılandırması
 CACHE_DIR="$SMART_EXECUTE_CONFIG_DIR/cache"
