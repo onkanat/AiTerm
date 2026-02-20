@@ -144,7 +144,9 @@ _check_session_timeout() {
         
         if [[ $time_diff -gt $SESSION_TIMEOUT ]]; then
             _audit_log "SESSION" "TIMEOUT" "Inactive for ${time_diff}s"
-            echo "⚠️  Oturum zaman aşımına uğradı. Yeniden kimlik doğrulama gerekli."
+            echo -e "\n\e[33m⚠️  Oturum zaman aşımına uğradı. Lütfen devam etmek için Enter'a basın.\e[0m" >&2
+            # Update session file so user is not permanently locked out
+            echo "$current_time" > "$session_file"
             return 1
         fi
     fi

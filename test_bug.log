@@ -1,0 +1,453 @@
++test_bug.zsh:1> source src/core/smart_execute_v2.zsh
++src/core/smart_execute_v2.zsh:39> SMART_EXECUTE_CONFIG_DIR=/Users/hakankilicaslan/.config/smart_execute 
++src/core/smart_execute_v2.zsh:40> SMART_EXECUTE_DIR=+src/core/smart_execute_v2.zsh:40> dirname src/core/smart_execute_v2.zsh
++src/core/smart_execute_v2.zsh:40> SMART_EXECUTE_DIR=src/core 
++src/core/smart_execute_v2.zsh:43> AUDIT_LOG=/Users/hakankilicaslan/.config/smart_execute/audit.log 
++src/core/smart_execute_v2.zsh:44> LOG_FILE=/Users/hakankilicaslan/.config/smart_execute/log.txt 
++src/core/smart_execute_v2.zsh:47> typeset -g BLACKLIST_PATTERNS=( )
++src/core/smart_execute_v2.zsh:48> typeset -g WHITELIST_PATTERNS=( )
++src/core/smart_execute_v2.zsh:69> _smart_source_module security.zsh
++_smart_source_module:1> local module_name=security.zsh
++_smart_source_module:4> [[ -f src/core/security.zsh ]]
++_smart_source_module:7> [[ -f src/core/../modules/security.zsh ]]
++_smart_source_module:8> source src/core/../modules/security.zsh
++src/core/../modules/security.zsh:225> _load_security_config
++_load_security_config:1> local config_file=/Users/hakankilicaslan/.config/smart_execute/.smart_execute_security.conf
++_load_security_config:2> [[ -f /Users/hakankilicaslan/.config/smart_execute/.smart_execute_security.conf ]]
++_load_security_config:6> SECURITY_LEVEL=2 
++_load_security_config:7> MAX_COMMAND_LENGTH=1000 
++_load_security_config:8> RATE_LIMIT_PER_MINUTE=20 
++_load_security_config:9> SESSION_TIMEOUT=1800 
++_load_security_config:10> ENABLE_AUDIT_LOG=true 
++_load_security_config:11> ENABLE_ANOMALY_DETECTION=true 
++src/core/smart_execute_v2.zsh:70> _smart_source_module cache.zsh
++_smart_source_module:1> local module_name=cache.zsh
++_smart_source_module:4> [[ -f src/core/cache.zsh ]]
++_smart_source_module:7> [[ -f src/core/../modules/cache.zsh ]]
++_smart_source_module:8> source src/core/../modules/cache.zsh
++src/core/../modules/cache.zsh:6> CACHE_DIR=/Users/hakankilicaslan/.config/smart_execute/cache 
++src/core/../modules/cache.zsh:7> CACHE_TTL=3600 
++src/core/../modules/cache.zsh:125> _init_cache
++_init_cache:1> [[ '' != true ]]
++_init_cache:1> return 0
++src/core/smart_execute_v2.zsh:71> _smart_source_module providers.zsh
++_smart_source_module:1> local module_name=providers.zsh
++_smart_source_module:4> [[ -f src/core/providers.zsh ]]
++_smart_source_module:7> [[ -f src/core/../modules/providers.zsh ]]
++_smart_source_module:8> source src/core/../modules/providers.zsh
++src/core/../modules/providers.zsh:6> declare -A LLM_PROVIDERS=([$'\M-"'ollama[http://localhost:11434/api/generate$'\M-"'[ollama_remotehttp://192.168.1.14:11434/api/generate[$'\M-"'openai[https://api.openai.com/v1/chat/completions$'\M-"'[anthropichttps://api.anthropic.com/v1/messages[$'\M-"'gemini )
++src/core/../modules/providers.zsh:14> declare -A LLM_MODELS=([$'\M-"'ollama[gemma3:1b-it-qat$'\M-"'[ollama_remotedevstral-small-2:latest[$'\M-"'openai[gpt-3.5-turbo$'\M-"'[anthropicclaude-3-sonnet-20240229[$'\M-"'gemini )
+]=]=]=]=]=]=]=]=]=]=]=]=]=]=+src/core/smart_execute_v2.zsh:72> _smart_source_module cross_shell.zsh
++_smart_source_module:1> local module_name=cross_shell.zsh
++_smart_source_module:4> [[ -f src/core/cross_shell.zsh ]]
++_smart_source_module:7> [[ -f src/core/../modules/cross_shell.zsh ]]
++_smart_source_module:8> source src/core/../modules/cross_shell.zsh
++src/core/smart_execute_v2.zsh:73> _smart_source_module wizard.zsh
++_smart_source_module:1> local module_name=wizard.zsh
++_smart_source_module:4> [[ -f src/core/wizard.zsh ]]
++_smart_source_module:7> [[ -f src/core/../modules/wizard.zsh ]]
++_smart_source_module:8> source src/core/../modules/wizard.zsh
++src/core/smart_execute_v2.zsh:96> LLM_URL=http://localhost:11434/api/generate 
++src/core/smart_execute_v2.zsh:97> LLM_MODEL=gemma3:1b-it-qat 
++src/core/smart_execute_v2.zsh:98> LLM_TIMEOUT=60 
++src/core/smart_execute_v2.zsh:99> LLM_PROVIDER=ollama 
++src/core/smart_execute_v2.zsh:100> FALLBACK_PROVIDER=ollama 
++src/core/smart_execute_v2.zsh:103> SECURITY_LEVEL=2 
++src/core/smart_execute_v2.zsh:104> MAX_COMMAND_LENGTH=1000 
++src/core/smart_execute_v2.zsh:105> MAX_RISK_SCORE=3 
++src/core/smart_execute_v2.zsh:106> RATE_LIMIT_PER_MINUTE=20 
++src/core/smart_execute_v2.zsh:107> SESSION_TIMEOUT=1800 
++src/core/smart_execute_v2.zsh:110> ENABLE_CACHE=true 
++src/core/smart_execute_v2.zsh:111> ENABLE_AUDIT_LOG=true 
++src/core/smart_execute_v2.zsh:112> ENABLE_ANOMALY_DETECTION=true 
++src/core/smart_execute_v2.zsh:113> ENABLE_SANDBOX=false 
++src/core/smart_execute_v2.zsh:116> CACHE_TTL=3600 
++src/core/smart_execute_v2.zsh:119> _smart_load_config
++_smart_load_config:1> local config_paths=( /Users/hakankilicaslan/.config/smart_execute/.smart_execute_security.conf /Users/hakankilicaslan/.config/smart_execute/security.conf src/core/security.conf src/core/.smart_execute_security.conf )
++_smart_load_config:8> config_path=/Users/hakankilicaslan/.config/smart_execute/.smart_execute_security.conf
++_smart_load_config:9> [[ -f /Users/hakankilicaslan/.config/smart_execute/.smart_execute_security.conf ]]
++_smart_load_config:8> config_path=/Users/hakankilicaslan/.config/smart_execute/security.conf
++_smart_load_config:9> [[ -f /Users/hakankilicaslan/.config/smart_execute/security.conf ]]
++_smart_load_config:8> config_path=src/core/security.conf
++_smart_load_config:9> [[ -f src/core/security.conf ]]
++_smart_load_config:8> config_path=src/core/.smart_execute_security.conf
++_smart_load_config:9> [[ -f src/core/.smart_execute_security.conf ]]
++src/core/smart_execute_v2.zsh:122> BLACKLIST_FILE=/Users/hakankilicaslan/.config/smart_execute/blacklist.txt 
++src/core/smart_execute_v2.zsh:123> WHITELIST_FILE=/Users/hakankilicaslan/.config/smart_execute/whitelist.txt 
++src/core/smart_execute_v2.zsh:126> SYSTEM_MESSAGE=$'Sen Linux/macOS terminal uzmanısın. Kullanıcı isteklerini analiz edip SADECE JSON formatında yanıt veriyorsun.\n\nKRİTİK KURALLAR:\n1. SADECE JSON formatında yanıt ver, başka hiçbir şey yazma.\n2. JSON objesi tek satırda olmalı, hiç yeni satır olmasın.\n3. Türkçe karakterleri doğru encode et.\n\nMODLAR VE FORMATLAR:\nA) KOMUT MODU (Kullanıcı bir işlem yaptırmak istiyorsa):\n   Format: {"command":"buraya_komut"}\n   Örnek: {"command":"ls -l"}\n   \nB) AÇIKLAMA MODU (Kullanıcı \'@?\' ile sorduysa veya açıklama istiyorsa):\n   Format: {"explanation":"buraya_aciklama"}\n   Örnek: {"explanation":"ls komutu dosyaları listeler."}\n\nTEHLİKELİ KOMUTLAR:\nTehlikeli veya riskli isteklerde: {"command":"DANGER", "explanation":"DANGER"}\n\nHATIRLA: Sadece istenen modun JSON anahtarını kullan. Tek satır, tek JSON.' 
++src/core/smart_execute_v2.zsh:733> alias 'smart-execute=smart_execute_command'
++src/core/smart_execute_v2.zsh:738> cmd=curl
++src/core/smart_execute_v2.zsh:739> command -v curl
++src/core/smart_execute_v2.zsh:738> cmd=jq
++src/core/smart_execute_v2.zsh:739> command -v jq
++src/core/smart_execute_v2.zsh:746> [[ ! -f /Users/hakankilicaslan/.config/smart_execute/.smart_execute_security.conf && ! -f /Users/hakankilicaslan/.config/smart_execute/security.conf ]]
++src/core/smart_execute_v2.zsh:747> echo '🚀 Smart Execute v2.0 ilk kez çalışıyor!'
++src/core/smart_execute_v2.zsh:748> echo 'Kurulum sihirbazını çalıştırmak için: smart-execute setup'
++src/core/smart_execute_v2.zsh:751> mkdir -p /Users/hakankilicaslan/.config/smart_execute
++src/core/smart_execute_v2.zsh:755> _smart_load_lists
++_smart_load_lists:2> BLACKLIST_PATTERNS=( ) 
++_smart_load_lists:5> [[ ! -f /Users/hakankilicaslan/.config/smart_execute/blacklist.txt ]]
++_smart_load_lists:11> [[ -f /Users/hakankilicaslan/.config/smart_execute/whitelist.txt ]]
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n '# Güvenli ve sık kullanılan komutlar' && '# Güvenli ve sık kullanılan komutlar' != \#* ]]
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n ls && ls != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( ls ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n 'ls -l' && 'ls -l' != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( 'ls -l' ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n 'ls -la' && 'ls -la' != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( 'ls -la' ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n 'ls -lh' && 'ls -lh' != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( 'ls -lh' ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n cd && cd != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( cd ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n pwd && pwd != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( pwd ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n 'git status' && 'git status' != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( 'git status' ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n 'git diff' && 'git diff' != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( 'git diff' ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n 'git log' && 'git log' != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( 'git log' ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n 'git pull' && 'git pull' != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( 'git pull' ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n 'git push' && 'git push' != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( 'git push' ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n source && source != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( source ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n which && which != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( which ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n whereis && whereis != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( whereis ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n man && man != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( man ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n whoami && whoami != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( whoami ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n clear && clear != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( clear ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n history && history != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( history ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n echo && echo != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( echo ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n cat && cat != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( cat ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n tail && tail != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( tail ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n head && head != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( head ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n grep && grep != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( grep ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n date && date != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( date ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n uname && uname != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( uname ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n ps && ps != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( ps ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n jobs && jobs != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( jobs ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n df && df != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( df ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n du && du != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( du ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n free && free != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( free ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n uptime && uptime != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( uptime ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n env && env != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( env ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n printenv && printenv != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( printenv ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++src/core/smart_execute_v2.zsh:758> [[+src/core/smart_execute_v2.zsh:758> whence -w _init_cache
++src/core/smart_execute_v2.zsh:758> [[ '_init_cache: function' == *function* ]]
++src/core/smart_execute_v2.zsh:759> _init_cache
++_init_cache:1> [[ true != true ]]
++_init_cache:2> mkdir -p /Users/hakankilicaslan/.config/smart_execute/cache
++src/core/smart_execute_v2.zsh:763> [[+src/core/smart_execute_v2.zsh:763> whence -w _cleanup_cache
++src/core/smart_execute_v2.zsh:763> [[ '_cleanup_cache: function' == *function* ]]
++src/core/smart_execute_v2.zsh:764> _cleanup_cache
++_cleanup_cache:1> [[ true != true ]]
++_cleanup_cache:2> [[ ! -d /Users/hakankilicaslan/.config/smart_execute/cache ]]
++_cleanup_cache:4> date +%s
++src/core/smart_execute_v2.zsh:773> [[+src/core/smart_execute_v2.zsh:773> whence -w setup_cross_shell_support
++src/core/smart_execute_v2.zsh:773> [[ 'setup_cross_shell_support: function' == *function* ]]
++src/core/smart_execute_v2.zsh:774> setup_cross_shell_support
++setup_cross_shell_support:1> detect_shell
++detect_shell:1> [[ -n 5.9 ]]
++detect_shell:2> echo zsh
++setup_cross_shell_support:1> local current_shell=zsh
++setup_cross_shell_support:3> echo 'Mevcut shell: zsh'
++setup_cross_shell_support:5> case zsh (bash)
++setup_cross_shell_support:5> case zsh (fish)
++setup_cross_shell_support:5> case zsh (zsh)
++setup_cross_shell_support:13> echo '✓ Zsh desteği varsayılan olarak mevcuttur'
++_cleanup_cache:4> local current_time=1771602666
++_cleanup_cache:5> local cleaned_count=0
++_cleanup_cache:8> setopt NULL_GLOB
++_cleanup_cache:20> unsetopt NULL_GLOB
++_cleanup_cache:22> [[ 0 -gt 0 ]]
++src/core/smart_execute_v2.zsh:778> zle -N smart_accept_line
++src/core/smart_execute_v2.zsh:779> bindkey '^M' smart_accept_line
++src/core/smart_execute_v2.zsh:780> bindkey '^J' smart_accept_line
++src/core/smart_execute_v2.zsh:783> _smart_log SYSTEM 'Smart Execute v2.0 loaded successfully'
++_smart_log:1> mkdir -p /Users/hakankilicaslan/.config/smart_execute
++_smart_log:2> date '+%Y-%m-%d %H:%M:%S'
++_smart_log:2> local timestamp='2026-02-20 18:51:06'
++_smart_log:3> echo '2026-02-20 18:51:06 | SYSTEM | Smart Execute v2.0 loaded successfully'
++_smart_log:6> [[+_smart_log:6> whence -w _audit_log
++_smart_log:6> [[ '_audit_log: function' == *function* ]]
++_smart_log:6> _audit_log SYSTEM SYSTEM 'Smart Execute v2.0 loaded successfully'
++_audit_log:1> [[ true != true ]]
++_audit_log:3> local level=SYSTEM
++_audit_log:4> local action=SYSTEM
++_audit_log:5> local details='Smart Execute v2.0 loaded successfully'
++_audit_log:6> date '+%Y-%m-%d %H:%M:%S'
++_audit_log:6> local timestamp='2026-02-20 18:51:06'
++_audit_log:7> whoami
++_audit_log:7> local user=hakankilicaslan
++_audit_log:8> local pid=90442
++_audit_log:9> tty
++_audit_log:9> local tty=/dev/ttys005
++_audit_log:10> local pwd=/Users/hakankilicaslan/GitHub/AiTerm
++_audit_log:12> echo '2026-02-20 18:51:06|SYSTEM|hakankilicaslan|90442|/dev/ttys005|/Users/hakankilicaslan/GitHub/AiTerm|SYSTEM|Smart Execute v2.0 loaded successfully'
++src/core/smart_execute_v2.zsh:785> echo '✅ Smart Execute v2.0 yüklendi!'
++src/core/smart_execute_v2.zsh:786> echo '📚 Yardım için: smart-execute help'
++src/core/smart_execute_v2.zsh:787> echo '⚙️  Kurulum için: smart-execute setup'
++test_bug.zsh:3> result=+test_bug.zsh:3> _call_llm_with_fallback 'list files' command
++_call_llm_with_fallback:1> local prompt='list files'
++_call_llm_with_fallback:2> local mode=command
++_call_llm_with_fallback:3> _select_best_provider 'list files'
++_select_best_provider:1> local query='list files'
++_select_best_provider:2> _assess_query_complexity 'list files'
++_assess_query_complexity:1> local query='list files'
++_assess_query_complexity:2> local complexity=simple
++_assess_query_complexity:5> echo 'list files'
++_assess_query_complexity:5> wc -w
++_assess_query_complexity:5> local word_count='       2'
++_assess_query_complexity:6> [[ '       2' -gt 10 ]]
++_assess_query_complexity:7> [[ '       2' -gt 20 ]]
++_assess_query_complexity:10> [[ "$query" -regex-match '(\||\&\&|\;|grep|awk|sed|find)' ]]
++_assess_query_complexity:13> [[ "$query" -regex-match '(while|for|if|case|function|\$\(|\{\})' ]]
++_assess_query_complexity:17> echo simple
++_select_best_provider:2> local complexity=simple
++_select_best_provider:5> local selected_provider=ollama
++_select_best_provider:8> [[ -n AIzaSyDoXThqKdUoIRQOtttp-WJe9AqsbhCvNxk ]]
++_select_best_provider:9> [[ simple == complex || simple == medium ]]
++_select_best_provider:16> case simple (simple)
++_select_best_provider:18> selected_provider=ollama 
++_select_best_provider:29> echo ollama
++_call_llm_with_fallback:3> local primary_provider=ollama
++_call_llm_with_fallback:5> echo -n $'\n\C-[[2m\U0001f9e0 LLM düşünüyor...\C-[[0m'
+
+[2m🧠 LLM düşünüyor...[0m+_call_llm_with_fallback:8> local providers_to_try=( ollama ollama ollama_remote )
++_call_llm_with_fallback:10> provider=ollama
++_call_llm_with_fallback:11> [[ -z ollama ]]
++_call_llm_with_fallback:13> _audit_log LLM TRYING_PROVIDER 'Provider: ollama'
++_audit_log:1> [[ true != true ]]
++_audit_log:3> local level=LLM
++_audit_log:4> local action=TRYING_PROVIDER
++_audit_log:5> local details='Provider: ollama'
++_audit_log:6> date '+%Y-%m-%d %H:%M:%S'
++_audit_log:6> local timestamp='2026-02-20 18:51:06'
++_audit_log:7> whoami
++_audit_log:7> local user=hakankilicaslan
++_audit_log:8> local pid=90442
++_audit_log:9> tty
++_audit_log:9> local tty=/dev/ttys005
++_audit_log:10> local pwd=/Users/hakankilicaslan/GitHub/AiTerm
++_audit_log:12> echo '2026-02-20 18:51:06|LLM|hakankilicaslan|90442|/dev/ttys005|/Users/hakankilicaslan/GitHub/AiTerm|TRYING_PROVIDER|Provider: ollama'
++_call_llm_with_fallback:15> local raw_response
++_call_llm_with_fallback:16> raw_response=+_call_llm_with_fallback:16> _call_llm_provider ollama 'list files' command
++_call_llm_provider:1> local provider=ollama
++_call_llm_provider:2> local prompt='list files'
++_call_llm_provider:3> local mode=command
++_call_llm_provider:5> case ollama (ollama)
++_call_llm_provider:6> _call_ollama 'list files' command localhost
++_call_ollama:1> local user_prompt='list files'
++_call_ollama:2> local mode=command
++_call_ollama:3> local host=localhost
++_call_ollama:4> local url=http://localhost:11434/api/generate
++_call_ollama:5> local model
++_call_ollama:7> [[ localhost == localhost ]]
++_call_ollama:8> model='' 
++_call_ollama:13> local full_prompt=$'Sen Linux/macOS terminal uzmanısın. Kullanıcı isteklerini analiz edip SADECE JSON formatında yanıt veriyorsun.\n\nKRİTİK KURALLAR:\n1. SADECE JSON formatında yanıt ver, başka hiçbir şey yazma.\n2. JSON objesi tek satırda olmalı, hiç yeni satır olmasın.\n3. Türkçe karakterleri doğru encode et.\n\nMODLAR VE FORMATLAR:\nA) KOMUT MODU (Kullanıcı bir işlem yaptırmak istiyorsa):\n   Format: {"command":"buraya_komut"}\n   Örnek: {"command":"ls -l"}\n   \nB) AÇIKLAMA MODU (Kullanıcı \'@?\' ile sorduysa veya açıklama istiyorsa):\n   Format: {"explanation":"buraya_aciklama"}\n   Örnek: {"explanation":"ls komutu dosyaları listeler."}\n\nTEHLİKELİ KOMUTLAR:\nTehlikeli veya riskli isteklerde: {"command":"DANGER", "explanation":"DANGER"}\n\nHATIRLA: Sadece istenen modun JSON anahtarını kullan. Tek satır, tek JSON.\\nİstek: list files'
++_call_ollama:15> local json_payload
++_call_ollama:16> json_payload=+_call_ollama:16> jq -n --arg model '' --arg prompt $'Sen Linux/macOS terminal uzmanısın. Kullanıcı isteklerini analiz edip SADECE JSON formatında yanıt veriyorsun.\n\nKRİTİK KURALLAR:\n1. SADECE JSON formatında yanıt ver, başka hiçbir şey yazma.\n2. JSON objesi tek satırda olmalı, hiç yeni satır olmasın.\n3. Türkçe karakterleri doğru encode et.\n\nMODLAR VE FORMATLAR:\nA) KOMUT MODU (Kullanıcı bir işlem yaptırmak istiyorsa):\n   Format: {"command":"buraya_komut"}\n   Örnek: {"command":"ls -l"}\n   \nB) AÇIKLAMA MODU (Kullanıcı \'@?\' ile sorduysa veya açıklama istiyorsa):\n   Format: {"explanation":"buraya_aciklama"}\n   Örnek: {"explanation":"ls komutu dosyaları listeler."}\n\nTEHLİKELİ KOMUTLAR:\nTehlikeli veya riskli isteklerde: {"command":"DANGER", "explanation":"DANGER"}\n\nHATIRLA: Sadece istenen modun JSON anahtarını kullan. Tek satır, tek JSON.\\nİstek: list files' '{model: $model, prompt: $prompt, stream: false, format: "json"}'
++_call_ollama:16> json_payload=$'{\n  "model": "",\n  "prompt": "Sen Linux/macOS terminal uzmanısın. Kullanıcı isteklerini analiz edip SADECE JSON formatında yanıt veriyorsun.\\n\\nKRİTİK KURALLAR:\\n1. SADECE JSON formatında yanıt ver, başka hiçbir şey yazma.\\n2. JSON objesi tek satırda olmalı, hiç yeni satır olmasın.\\n3. Türkçe karakterleri doğru encode et.\\n\\nMODLAR VE FORMATLAR:\\nA) KOMUT MODU (Kullanıcı bir işlem yaptırmak istiyorsa):\\n   Format: {\\"command\\":\\"buraya_komut\\"}\\n   Örnek: {\\"command\\":\\"ls -l\\"}\\n   \\nB) AÇIKLAMA MODU (Kullanıcı \'@?\' ile sorduysa veya açıklama istiyorsa):\\n   Format: {\\"explanation\\":\\"buraya_aciklama\\"}\\n   Örnek: {\\"explanation\\":\\"ls komutu dosyaları listeler.\\"}\\n\\nTEHLİKELİ KOMUTLAR:\\nTehlikeli veya riskli isteklerde: {\\"command\\":\\"DANGER\\", \\"explanation\\":\\"DANGER\\"}\\n\\nHATIRLA: Sadece istenen modun JSON anahtarını kullan. Tek satır, tek JSON.\\\\nİstek: list files",\n  "stream": false,\n  "format": "json"\n}' 
++_call_ollama:21> curl -s --max-time 60 -X POST http://localhost:11434/api/generate -H 'Content-Type: application/json' -d $'{\n  "model": "",\n  "prompt": "Sen Linux/macOS terminal uzmanısın. Kullanıcı isteklerini analiz edip SADECE JSON formatında yanıt veriyorsun.\\n\\nKRİTİK KURALLAR:\\n1. SADECE JSON formatında yanıt ver, başka hiçbir şey yazma.\\n2. JSON objesi tek satırda olmalı, hiç yeni satır olmasın.\\n3. Türkçe karakterleri doğru encode et.\\n\\nMODLAR VE FORMATLAR:\\nA) KOMUT MODU (Kullanıcı bir işlem yaptırmak istiyorsa):\\n   Format: {\\"command\\":\\"buraya_komut\\"}\\n   Örnek: {\\"command\\":\\"ls -l\\"}\\n   \\nB) AÇIKLAMA MODU (Kullanıcı \'@?\' ile sorduysa veya açıklama istiyorsa):\\n   Format: {\\"explanation\\":\\"buraya_aciklama\\"}\\n   Örnek: {\\"explanation\\":\\"ls komutu dosyaları listeler.\\"}\\n\\nTEHLİKELİ KOMUTLAR:\\nTehlikeli veya riskli isteklerde: {\\"command\\":\\"DANGER\\", \\"explanation\\":\\"DANGER\\"}\\n\\nHATIRLA: Sadece istenen modun JSON anahtarını kullan. Tek satır, tek JSON.\\\\nİstek: list files",\n  "stream": false,\n  "format": "json"\n}'
++_call_llm_with_fallback:16> raw_response='{"error":"model '\'\'' not found"}' 
++_call_llm_with_fallback:18> [[ 0 -eq 0 && -n '{"error":"model '\'\'' not found"}' ]]
++_call_llm_with_fallback:19> _parse_provider_response ollama '{"error":"model '\'\'' not found"}' command
++_parse_provider_response:1> local provider=ollama
++_parse_provider_response:2> local raw_response='{"error":"model '\'\'' not found"}'
++_parse_provider_response:3> local mode=command
++_parse_provider_response:4> local parsed_text
++_parse_provider_response:6> case ollama (gemini)
++_parse_provider_response:6> case ollama (ollama)
++_parse_provider_response:11> parsed_text=+_parse_provider_response:11> echo '{"error":"model '\'\'' not found"}'
++_parse_provider_response:11> parsed_text=+_parse_provider_response:11> jq -r '.response // ""'
++_parse_provider_response:11> parsed_text='' 
++_parse_provider_response:22> echo ''
++_parse_provider_response:22> jq .
++_parse_provider_response:23> local content=''
++_parse_provider_response:24> [[ command == explanation ]]
++_parse_provider_response:27> content=+_parse_provider_response:27> echo ''
++_parse_provider_response:27> content=+_parse_provider_response:27> jq -r '.command // .explanation // .response // empty'
++_parse_provider_response:27> content='' 
++_parse_provider_response:30> [[ -n '' ]]
++_parse_provider_response:34> echo ''
++_call_llm_with_fallback:19> local response=''
++_call_llm_with_fallback:20> [[ -n '' ]]
++_call_llm_with_fallback:10> provider=ollama
++_call_llm_with_fallback:11> [[ -z ollama ]]
++_call_llm_with_fallback:13> _audit_log LLM TRYING_PROVIDER 'Provider: ollama'
++_audit_log:1> [[ true != true ]]
++_audit_log:3> local level=LLM
++_audit_log:4> local action=TRYING_PROVIDER
++_audit_log:5> local details='Provider: ollama'
++_audit_log:6> date '+%Y-%m-%d %H:%M:%S'
++_audit_log:6> local timestamp='2026-02-20 18:51:06'
++_audit_log:7> whoami
++_audit_log:7> local user=hakankilicaslan
++_audit_log:8> local pid=90442
++_audit_log:9> tty
++_audit_log:9> local tty=/dev/ttys005
++_audit_log:10> local pwd=/Users/hakankilicaslan/GitHub/AiTerm
++_audit_log:12> echo '2026-02-20 18:51:06|LLM|hakankilicaslan|90442|/dev/ttys005|/Users/hakankilicaslan/GitHub/AiTerm|TRYING_PROVIDER|Provider: ollama'
++_call_llm_with_fallback:15> local raw_response
++_call_llm_with_fallback:16> raw_response=+_call_llm_with_fallback:16> _call_llm_provider ollama 'list files' command
++_call_llm_provider:1> local provider=ollama
++_call_llm_provider:2> local prompt='list files'
++_call_llm_provider:3> local mode=command
++_call_llm_provider:5> case ollama (ollama)
++_call_llm_provider:6> _call_ollama 'list files' command localhost
++_call_ollama:1> local user_prompt='list files'
++_call_ollama:2> local mode=command
++_call_ollama:3> local host=localhost
++_call_ollama:4> local url=http://localhost:11434/api/generate
++_call_ollama:5> local model
++_call_ollama:7> [[ localhost == localhost ]]
++_call_ollama:8> model='' 
++_call_ollama:13> local full_prompt=$'Sen Linux/macOS terminal uzmanısın. Kullanıcı isteklerini analiz edip SADECE JSON formatında yanıt veriyorsun.\n\nKRİTİK KURALLAR:\n1. SADECE JSON formatında yanıt ver, başka hiçbir şey yazma.\n2. JSON objesi tek satırda olmalı, hiç yeni satır olmasın.\n3. Türkçe karakterleri doğru encode et.\n\nMODLAR VE FORMATLAR:\nA) KOMUT MODU (Kullanıcı bir işlem yaptırmak istiyorsa):\n   Format: {"command":"buraya_komut"}\n   Örnek: {"command":"ls -l"}\n   \nB) AÇIKLAMA MODU (Kullanıcı \'@?\' ile sorduysa veya açıklama istiyorsa):\n   Format: {"explanation":"buraya_aciklama"}\n   Örnek: {"explanation":"ls komutu dosyaları listeler."}\n\nTEHLİKELİ KOMUTLAR:\nTehlikeli veya riskli isteklerde: {"command":"DANGER", "explanation":"DANGER"}\n\nHATIRLA: Sadece istenen modun JSON anahtarını kullan. Tek satır, tek JSON.\\nİstek: list files'
++_call_ollama:15> local json_payload
++_call_ollama:16> json_payload=+_call_ollama:16> jq -n --arg model '' --arg prompt $'Sen Linux/macOS terminal uzmanısın. Kullanıcı isteklerini analiz edip SADECE JSON formatında yanıt veriyorsun.\n\nKRİTİK KURALLAR:\n1. SADECE JSON formatında yanıt ver, başka hiçbir şey yazma.\n2. JSON objesi tek satırda olmalı, hiç yeni satır olmasın.\n3. Türkçe karakterleri doğru encode et.\n\nMODLAR VE FORMATLAR:\nA) KOMUT MODU (Kullanıcı bir işlem yaptırmak istiyorsa):\n   Format: {"command":"buraya_komut"}\n   Örnek: {"command":"ls -l"}\n   \nB) AÇIKLAMA MODU (Kullanıcı \'@?\' ile sorduysa veya açıklama istiyorsa):\n   Format: {"explanation":"buraya_aciklama"}\n   Örnek: {"explanation":"ls komutu dosyaları listeler."}\n\nTEHLİKELİ KOMUTLAR:\nTehlikeli veya riskli isteklerde: {"command":"DANGER", "explanation":"DANGER"}\n\nHATIRLA: Sadece istenen modun JSON anahtarını kullan. Tek satır, tek JSON.\\nİstek: list files' '{model: $model, prompt: $prompt, stream: false, format: "json"}'
++_call_ollama:16> json_payload=$'{\n  "model": "",\n  "prompt": "Sen Linux/macOS terminal uzmanısın. Kullanıcı isteklerini analiz edip SADECE JSON formatında yanıt veriyorsun.\\n\\nKRİTİK KURALLAR:\\n1. SADECE JSON formatında yanıt ver, başka hiçbir şey yazma.\\n2. JSON objesi tek satırda olmalı, hiç yeni satır olmasın.\\n3. Türkçe karakterleri doğru encode et.\\n\\nMODLAR VE FORMATLAR:\\nA) KOMUT MODU (Kullanıcı bir işlem yaptırmak istiyorsa):\\n   Format: {\\"command\\":\\"buraya_komut\\"}\\n   Örnek: {\\"command\\":\\"ls -l\\"}\\n   \\nB) AÇIKLAMA MODU (Kullanıcı \'@?\' ile sorduysa veya açıklama istiyorsa):\\n   Format: {\\"explanation\\":\\"buraya_aciklama\\"}\\n   Örnek: {\\"explanation\\":\\"ls komutu dosyaları listeler.\\"}\\n\\nTEHLİKELİ KOMUTLAR:\\nTehlikeli veya riskli isteklerde: {\\"command\\":\\"DANGER\\", \\"explanation\\":\\"DANGER\\"}\\n\\nHATIRLA: Sadece istenen modun JSON anahtarını kullan. Tek satır, tek JSON.\\\\nİstek: list files",\n  "stream": false,\n  "format": "json"\n}' 
++_call_ollama:21> curl -s --max-time 60 -X POST http://localhost:11434/api/generate -H 'Content-Type: application/json' -d $'{\n  "model": "",\n  "prompt": "Sen Linux/macOS terminal uzmanısın. Kullanıcı isteklerini analiz edip SADECE JSON formatında yanıt veriyorsun.\\n\\nKRİTİK KURALLAR:\\n1. SADECE JSON formatında yanıt ver, başka hiçbir şey yazma.\\n2. JSON objesi tek satırda olmalı, hiç yeni satır olmasın.\\n3. Türkçe karakterleri doğru encode et.\\n\\nMODLAR VE FORMATLAR:\\nA) KOMUT MODU (Kullanıcı bir işlem yaptırmak istiyorsa):\\n   Format: {\\"command\\":\\"buraya_komut\\"}\\n   Örnek: {\\"command\\":\\"ls -l\\"}\\n   \\nB) AÇIKLAMA MODU (Kullanıcı \'@?\' ile sorduysa veya açıklama istiyorsa):\\n   Format: {\\"explanation\\":\\"buraya_aciklama\\"}\\n   Örnek: {\\"explanation\\":\\"ls komutu dosyaları listeler.\\"}\\n\\nTEHLİKELİ KOMUTLAR:\\nTehlikeli veya riskli isteklerde: {\\"command\\":\\"DANGER\\", \\"explanation\\":\\"DANGER\\"}\\n\\nHATIRLA: Sadece istenen modun JSON anahtarını kullan. Tek satır, tek JSON.\\\\nİstek: list files",\n  "stream": false,\n  "format": "json"\n}'
++_call_llm_with_fallback:16> raw_response='{"error":"model '\'\'' not found"}' 
++_call_llm_with_fallback:18> [[ 0 -eq 0 && -n '{"error":"model '\'\'' not found"}' ]]
++_call_llm_with_fallback:19> _parse_provider_response ollama '{"error":"model '\'\'' not found"}' command
++_parse_provider_response:1> local provider=ollama
++_parse_provider_response:2> local raw_response='{"error":"model '\'\'' not found"}'
++_parse_provider_response:3> local mode=command
++_parse_provider_response:4> local parsed_text
++_parse_provider_response:6> case ollama (gemini)
++_parse_provider_response:6> case ollama (ollama)
++_parse_provider_response:11> parsed_text=+_parse_provider_response:11> echo '{"error":"model '\'\'' not found"}'
++_parse_provider_response:11> parsed_text=+_parse_provider_response:11> jq -r '.response // ""'
++_parse_provider_response:11> parsed_text='' 
++_parse_provider_response:22> echo ''
++_parse_provider_response:22> jq .
++_parse_provider_response:23> local content=''
++_parse_provider_response:24> [[ command == explanation ]]
++_parse_provider_response:27> content=+_parse_provider_response:27> echo ''
++_parse_provider_response:27> content=+_parse_provider_response:27> jq -r '.command // .explanation // .response // empty'
++_parse_provider_response:27> content='' 
++_parse_provider_response:30> [[ -n '' ]]
++_parse_provider_response:34> echo ''
++_call_llm_with_fallback:19> local response=''
++_call_llm_with_fallback:20> [[ -n '' ]]
++_call_llm_with_fallback:10> provider=ollama_remote
++_call_llm_with_fallback:11> [[ -z ollama_remote ]]
++_call_llm_with_fallback:13> _audit_log LLM TRYING_PROVIDER 'Provider: ollama_remote'
++_audit_log:1> [[ true != true ]]
++_audit_log:3> local level=LLM
++_audit_log:4> local action=TRYING_PROVIDER
++_audit_log:5> local details='Provider: ollama_remote'
++_audit_log:6> date '+%Y-%m-%d %H:%M:%S'
++_audit_log:6> local timestamp='2026-02-20 18:51:06'
++_audit_log:7> whoami
++_audit_log:7> local user=hakankilicaslan
++_audit_log:8> local pid=90442
++_audit_log:9> tty
++_audit_log:9> local tty=/dev/ttys005
++_audit_log:10> local pwd=/Users/hakankilicaslan/GitHub/AiTerm
++_audit_log:12> echo '2026-02-20 18:51:06|LLM|hakankilicaslan|90442|/dev/ttys005|/Users/hakankilicaslan/GitHub/AiTerm|TRYING_PROVIDER|Provider: ollama_remote'
++_call_llm_with_fallback:15> local raw_response
++_call_llm_with_fallback:16> raw_response=+_call_llm_with_fallback:16> _call_llm_provider ollama_remote 'list files' command
++_call_llm_provider:1> local provider=ollama_remote
++_call_llm_provider:2> local prompt='list files'
++_call_llm_provider:3> local mode=command
++_call_llm_provider:5> case ollama_remote (ollama)
++_call_llm_provider:5> case ollama_remote (ollama_remote)
++_call_llm_provider:7> _call_ollama 'list files' command 192.168.1.14
++_call_ollama:1> local user_prompt='list files'
++_call_ollama:2> local mode=command
++_call_ollama:3> local host=192.168.1.14
++_call_ollama:4> local url=http://192.168.1.14:11434/api/generate
++_call_ollama:5> local model
++_call_ollama:7> [[ 192.168.1.14 == localhost ]]
++_call_ollama:10> model='' 
++_call_ollama:13> local full_prompt=$'Sen Linux/macOS terminal uzmanısın. Kullanıcı isteklerini analiz edip SADECE JSON formatında yanıt veriyorsun.\n\nKRİTİK KURALLAR:\n1. SADECE JSON formatında yanıt ver, başka hiçbir şey yazma.\n2. JSON objesi tek satırda olmalı, hiç yeni satır olmasın.\n3. Türkçe karakterleri doğru encode et.\n\nMODLAR VE FORMATLAR:\nA) KOMUT MODU (Kullanıcı bir işlem yaptırmak istiyorsa):\n   Format: {"command":"buraya_komut"}\n   Örnek: {"command":"ls -l"}\n   \nB) AÇIKLAMA MODU (Kullanıcı \'@?\' ile sorduysa veya açıklama istiyorsa):\n   Format: {"explanation":"buraya_aciklama"}\n   Örnek: {"explanation":"ls komutu dosyaları listeler."}\n\nTEHLİKELİ KOMUTLAR:\nTehlikeli veya riskli isteklerde: {"command":"DANGER", "explanation":"DANGER"}\n\nHATIRLA: Sadece istenen modun JSON anahtarını kullan. Tek satır, tek JSON.\\nİstek: list files'
++_call_ollama:15> local json_payload
++_call_ollama:16> json_payload=+_call_ollama:16> jq -n --arg model '' --arg prompt $'Sen Linux/macOS terminal uzmanısın. Kullanıcı isteklerini analiz edip SADECE JSON formatında yanıt veriyorsun.\n\nKRİTİK KURALLAR:\n1. SADECE JSON formatında yanıt ver, başka hiçbir şey yazma.\n2. JSON objesi tek satırda olmalı, hiç yeni satır olmasın.\n3. Türkçe karakterleri doğru encode et.\n\nMODLAR VE FORMATLAR:\nA) KOMUT MODU (Kullanıcı bir işlem yaptırmak istiyorsa):\n   Format: {"command":"buraya_komut"}\n   Örnek: {"command":"ls -l"}\n   \nB) AÇIKLAMA MODU (Kullanıcı \'@?\' ile sorduysa veya açıklama istiyorsa):\n   Format: {"explanation":"buraya_aciklama"}\n   Örnek: {"explanation":"ls komutu dosyaları listeler."}\n\nTEHLİKELİ KOMUTLAR:\nTehlikeli veya riskli isteklerde: {"command":"DANGER", "explanation":"DANGER"}\n\nHATIRLA: Sadece istenen modun JSON anahtarını kullan. Tek satır, tek JSON.\\nİstek: list files' '{model: $model, prompt: $prompt, stream: false, format: "json"}'
++_call_ollama:16> json_payload=$'{\n  "model": "",\n  "prompt": "Sen Linux/macOS terminal uzmanısın. Kullanıcı isteklerini analiz edip SADECE JSON formatında yanıt veriyorsun.\\n\\nKRİTİK KURALLAR:\\n1. SADECE JSON formatında yanıt ver, başka hiçbir şey yazma.\\n2. JSON objesi tek satırda olmalı, hiç yeni satır olmasın.\\n3. Türkçe karakterleri doğru encode et.\\n\\nMODLAR VE FORMATLAR:\\nA) KOMUT MODU (Kullanıcı bir işlem yaptırmak istiyorsa):\\n   Format: {\\"command\\":\\"buraya_komut\\"}\\n   Örnek: {\\"command\\":\\"ls -l\\"}\\n   \\nB) AÇIKLAMA MODU (Kullanıcı \'@?\' ile sorduysa veya açıklama istiyorsa):\\n   Format: {\\"explanation\\":\\"buraya_aciklama\\"}\\n   Örnek: {\\"explanation\\":\\"ls komutu dosyaları listeler.\\"}\\n\\nTEHLİKELİ KOMUTLAR:\\nTehlikeli veya riskli isteklerde: {\\"command\\":\\"DANGER\\", \\"explanation\\":\\"DANGER\\"}\\n\\nHATIRLA: Sadece istenen modun JSON anahtarını kullan. Tek satır, tek JSON.\\\\nİstek: list files",\n  "stream": false,\n  "format": "json"\n}' 
++_call_ollama:21> curl -s --max-time 60 -X POST http://192.168.1.14:11434/api/generate -H 'Content-Type: application/json' -d $'{\n  "model": "",\n  "prompt": "Sen Linux/macOS terminal uzmanısın. Kullanıcı isteklerini analiz edip SADECE JSON formatında yanıt veriyorsun.\\n\\nKRİTİK KURALLAR:\\n1. SADECE JSON formatında yanıt ver, başka hiçbir şey yazma.\\n2. JSON objesi tek satırda olmalı, hiç yeni satır olmasın.\\n3. Türkçe karakterleri doğru encode et.\\n\\nMODLAR VE FORMATLAR:\\nA) KOMUT MODU (Kullanıcı bir işlem yaptırmak istiyorsa):\\n   Format: {\\"command\\":\\"buraya_komut\\"}\\n   Örnek: {\\"command\\":\\"ls -l\\"}\\n   \\nB) AÇIKLAMA MODU (Kullanıcı \'@?\' ile sorduysa veya açıklama istiyorsa):\\n   Format: {\\"explanation\\":\\"buraya_aciklama\\"}\\n   Örnek: {\\"explanation\\":\\"ls komutu dosyaları listeler.\\"}\\n\\nTEHLİKELİ KOMUTLAR:\\nTehlikeli veya riskli isteklerde: {\\"command\\":\\"DANGER\\", \\"explanation\\":\\"DANGER\\"}\\n\\nHATIRLA: Sadece istenen modun JSON anahtarını kullan. Tek satır, tek JSON.\\\\nİstek: list files",\n  "stream": false,\n  "format": "json"\n}'
++_call_llm_with_fallback:16> raw_response='{"error":"model '\'\'' not found"}' 
++_call_llm_with_fallback:18> [[ 0 -eq 0 && -n '{"error":"model '\'\'' not found"}' ]]
++_call_llm_with_fallback:19> _parse_provider_response ollama_remote '{"error":"model '\'\'' not found"}' command
++_parse_provider_response:1> local provider=ollama_remote
++_parse_provider_response:2> local raw_response='{"error":"model '\'\'' not found"}'
++_parse_provider_response:3> local mode=command
++_parse_provider_response:4> local parsed_text
++_parse_provider_response:6> case ollama_remote (gemini)
++_parse_provider_response:6> case ollama_remote (ollama | ollama_remote)
++_parse_provider_response:11> parsed_text=+_parse_provider_response:11> echo '{"error":"model '\'\'' not found"}'
++_parse_provider_response:11> parsed_text=+_parse_provider_response:11> jq -r '.response // ""'
++_parse_provider_response:11> parsed_text='' 
++_parse_provider_response:22> echo ''
++_parse_provider_response:22> jq .
++_parse_provider_response:23> local content=''
++_parse_provider_response:24> [[ command == explanation ]]
++_parse_provider_response:27> content=+_parse_provider_response:27> echo ''
++_parse_provider_response:27> content=+_parse_provider_response:27> jq -r '.command // .explanation // .response // empty'
++_parse_provider_response:27> content='' 
++_parse_provider_response:30> [[ -n '' ]]
++_parse_provider_response:34> echo ''
++_call_llm_with_fallback:19> local response=''
++_call_llm_with_fallback:20> [[ -n '' ]]
++_call_llm_with_fallback:28> echo -ne '\r\e[K'
+[K+_call_llm_with_fallback:29> return 1
++test_bug.zsh:3> result=$'raw_response=\'{"error":"model \'\\\'\\\'\' not found"}\'\nraw_response=\'{"error":"model \'\\\'\\\'\' not found"}\'' 
++test_bug.zsh:4> echo $'RESULT: raw_response=\'{"error":"model \'\\\'\\\'\' not found"}\'\nraw_response=\'{"error":"model \'\\\'\\\'\' not found"}\''

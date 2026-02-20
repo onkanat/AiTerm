@@ -49,34 +49,62 @@ typeset -g WHITELIST_PATTERNS=()
 
 # =================== MODÜL YÜKLEME =====================
 
-# Güvenlik modülü
-if [[ -f "$SMART_EXECUTE_DIR/.smart_execute_security.zsh" ]]; then
-    source "$SMART_EXECUTE_DIR/.smart_execute_security.zsh"
-fi
+# Yardımcı fonksiyon: Modül yükle
+_smart_source_module() {
+    local module_name="$1"
+    
+    # 1. Aynı dizinde (kurulu hali)
+    if [[ -f "$SMART_EXECUTE_DIR/$module_name" ]]; then
+        source "$SMART_EXECUTE_DIR/$module_name"
+    # 2. Üst dizindeki modules klasöründe (repo hali)
+    elif [[ -f "$SMART_EXECUTE_DIR/../modules/$module_name" ]]; then
+        source "$SMART_EXECUTE_DIR/../modules/$module_name"
+    # 3. Eski isimlendirme formatı (.smart_execute_*.zsh)
+    elif [[ -f "$SMART_EXECUTE_DIR/.smart_execute_$module_name" ]]; then
+        source "$SMART_EXECUTE_DIR/.smart_execute_$module_name"
+    fi
+}
 
-# Cache modülü
-if [[ -f "$SMART_EXECUTE_DIR/.smart_execute_cache.zsh" ]]; then
-    source "$SMART_EXECUTE_DIR/.smart_execute_cache.zsh"
-fi
+# Modülleri yükle
+_smart_source_module "security.zsh"
+_smart_source_module "cache.zsh"
+_smart_source_module "providers.zsh"
+_smart_source_module "cross_shell.zsh"
+_smart_source_module "wizard.zsh"
 
-# Provider modülü
-if [[ -f "$SMART_EXECUTE_DIR/.smart_execute_providers.zsh" ]]; then
-    source "$SMART_EXECUTE_DIR/.smart_execute_providers.zsh"
-fi
+# =================== TEMEL FONKSİYONLAR =====================
 
-# Cross-shell desteği
-if [[ -f "$SMART_EXECUTE_DIR/.smart_execute_cross_shell.zsh" ]]; then
-    source "$SMART_EXECUTE_DIR/.smart_execute_cross_shell.zsh"
-fi
-
-# Wizard modülü
-if [[ -f "$SMART_EXECUTE_DIR/.smart_execute_wizard.zsh" ]]; then
-    source "$SMART_EXECUTE_DIR/.smart_execute_wizard.zsh"
-fi
+# Basit loglama fonksiyonu (backwards compatibility)
+_smart_log() {
+    mkdir -p "$SMART_EXECUTE_CONFIG_DIR"
+    local timestamp="$(date '+%Y-%m-%d %H:%M:%S' 2>/dev/null || echo 'timestamp-error')"
+    echo "$timestamp | $1 | $2" >> "$LOG_FILE"
+    
+    # Audit log varsa oraya da kaydet
+    [[ "$(whence -w _audit_log 2>/dev/null)" == *function* ]] && _audit_log "$1" "$1" "$2"
+}
 
 # =================== ANA KONFIGÜRASYON =====================
 
-# Varsayılan ayarlar
+# Yapılandırmayı yükle (çoklu konum desteği)
+_smart_load_config() {
+    local config_paths=(
+        "$SMART_EXECUTE_CONFIG_DIR/.smart_execute_security.conf"
+        "$SMART_EXECUTE_CONFIG_DIR/security.conf"
+        "$SMART_EXECUTE_DIR/security.conf"
+        "$SMART_EXECUTE_DIR/.smart_execute_security.conf"
+    )
+    
+    for config_path in "${config_paths[@]}"; do
+        if [[ -f "$config_path" ]]; then
+            source "$config_path"
+            _smart_log "SYSTEM" "Config loaded from: $config_path"
+            return 0
+        fi
+    done
+}
+
+# Varsayılan ayarlar (config yüklenemezse kullanılır)
 LLM_URL="http://localhost:11434/api/generate"
 LLM_MODEL="gemma3:1b-it-qat"
 LLM_TIMEOUT=60
@@ -99,41 +127,35 @@ ENABLE_SANDBOX=false
 # Cache ayarları
 CACHE_TTL=3600
 
-# Dosya yolları
-BLACKLIST_FILE="$SMART_EXECUTE_CONFIG_DIR/blacklist.txt"
-WHITELIST_FILE="$SMART_EXECUTE_CONFIG_DIR/whitelist.txt"
+# Yapılandırmayı yükle
+_smart_load_config
+
+# Dosya yolları (config yüklendikten sonra set et)
+BLACKLIST_FILE="${BLACKLIST_FILE:-$SMART_EXECUTE_CONFIG_DIR/blacklist.txt}"
+WHITELIST_FILE="${WHITELIST_FILE:-$SMART_EXECUTE_CONFIG_DIR/whitelist.txt}"
 
 # Gelişmiş sistem mesajı
 SYSTEM_MESSAGE="Sen Linux/macOS terminal uzmanısın. Kullanıcı isteklerini analiz edip SADECE JSON formatında yanıt veriyorsun.
 
 KRİTİK KURALLAR:
-1. SADECE JSON formatında yanıt ver, başka hiçbir şey yazma
-2. JSON objesi tek satırda olmalı, hiç yeni satır olmasın  
-3. Türkçe karakterleri doğru encode et
+1. SADECE JSON formatında yanıt ver, başka hiçbir şey yazma.
+2. JSON objesi tek satırda olmalı, hiç yeni satır olmasın.
+3. Türkçe karakterleri doğru encode et.
 
-İKİ MOD VAR:
-A) KOMUT MODU: Kullanıcı bir işlem yaptırmak istiyorsa
-   Örnek: {\"command\":\"ls -l > dosya.txt\"}
+MODLAR VE FORMATLAR:
+A) KOMUT MODU (Kullanıcı bir işlem yaptırmak istiyorsa):
+   Format: {\"command\":\"buraya_komut\"}
+   Örnek: {\"command\":\"ls -l\"}
    
-B) AÇIKLAMA MODU: Kullanıcı bir şeyin nasıl yapıldığını öğrenmek istiyorsa  
-   Örnek: {\"explanation\":\"Komut çıktısını dosyaya yazmak için '>' operatörü kullanılır.\"}
+B) AÇIKLAMA MODU (Kullanıcı '@?' ile sorduysa veya açıklama istiyorsa):
+   Format: {\"explanation\":\"buraya_aciklama\"}
+   Örnek: {\"explanation\":\"ls komutu dosyaları listeler.\"}
 
 TEHLİKELİ KOMUTLAR:
-Tehlikeli isteklerde: {\"command\":\"DANGER\"} veya {\"explanation\":\"DANGER\"}
+Tehlikeli veya riskli isteklerde: {\"command\":\"DANGER\", \"explanation\":\"DANGER\"}
 
-HATIRLA: Tek JSON objesi, tek satır, başka hiçbir şey yazma!"
+HATIRLA: Sadece istenen modun JSON anahtarını kullan. Tek satır, tek JSON."
 
-# =================== TEMEL FONKSİYONLAR =====================
-
-# Basit loglama fonksiyonu (backwards compatibility)
-_smart_log() {
-    mkdir -p "$SMART_EXECUTE_CONFIG_DIR"
-    local timestamp="$(date '+%Y-%m-%d %H:%M:%S' 2>/dev/null || echo 'timestamp-error')"
-    echo "$timestamp | $1 | $2" >> "$LOG_FILE"
-    
-    # Audit log varsa oraya da kaydet
-    [[ "$(whence -w _audit_log 2>/dev/null)" == *function* ]] && _audit_log "$1" "$1" "$2"
-}
 
 # Liste yükleme fonksiyonu
 _smart_load_lists() {
@@ -272,9 +294,11 @@ _call_llm() {
 
     # Multi-provider desteği
     local response
+    local fallback_used="false"
     if [[ "$(whence -w _call_llm_with_fallback 2>/dev/null)" == *function* ]]; then
         response=$(_call_llm_with_fallback "$user_prompt" "$mode")
         curl_exit_code=$?
+        fallback_used="true"
     else
         # Fallback: Basit Ollama çağrısı
         echo -n $'\n\e[2m🧠 LLM düşünüyor...\e[0m' >&2
@@ -301,41 +325,44 @@ _call_llm() {
         return 1
     fi
 
-    # Response'u basit şekilde parse et
+    # Parse according to whether fallback handled it or not
     local response_field=""
-    
-    # Önce response field'ını al
-    if echo "$response" | jq . >/dev/null 2>&1; then
-        response_field=$(echo "$response" | jq -r '.response // ""' 2>/dev/null)
-    fi
-    
-    # Eğer response field boş ise ham response'u kullan
-    if [[ -z "$response_field" || "$response_field" == "null" ]]; then
+    if [[ "$fallback_used" == "true" ]]; then
         response_field="$response"
-    fi
-    
-    # İçerik command/explanation içeriyor mu kontrol et
-    # Provider response nested JSON olabilir, önce parse edelim
-    local inner_json=""
-    if echo "$response_field" | jq . >/dev/null 2>&1; then
-        inner_json="$response_field"
     else
-        # response field içinde nested JSON string olabilir
-        if echo "$response_field" | grep -q '{".*"}'; then
-            inner_json="$response_field"
+        # Önce response field'ını al
+        if echo "$response" | jq . >/dev/null 2>&1; then
+            response_field=$(echo "$response" | jq -r '.response // ""' 2>/dev/null)
         fi
-    fi
-    
-    if [[ -n "$inner_json" ]]; then
-        if [[ "$mode" == "explanation" ]]; then
-            local explanation=$(echo "$inner_json" | jq -r '.explanation // empty' 2>/dev/null)
-            if [[ -n "$explanation" && "$explanation" != "null" ]]; then
-                response_field="$explanation"
-            fi
+        
+        # Eğer response field boş ise ham response'u kullan
+        if [[ -z "$response_field" || "$response_field" == "null" ]]; then
+            response_field="$response"
+        fi
+        
+        # İçerik command/explanation içeriyor mu kontrol et
+        # Provider response nested JSON olabilir, önce parse edelim
+        local inner_json=""
+        if echo "$response_field" | jq . >/dev/null 2>&1; then
+            inner_json="$response_field"
         else
-            local command=$(echo "$inner_json" | jq -r '.command // empty' 2>/dev/null)
-            if [[ -n "$command" && "$command" != "null" ]]; then
-                response_field="$command"
+            # response field içinde nested JSON string olabilir
+            if echo "$response_field" | grep -q '{".*"}'; then
+                inner_json="$response_field"
+            fi
+        fi
+        
+        if [[ -n "$inner_json" ]]; then
+            if [[ "$mode" == "explanation" ]]; then
+                local explanation=$(echo "$inner_json" | jq -r '.explanation // empty' 2>/dev/null)
+                if [[ -n "$explanation" && "$explanation" != "null" ]]; then
+                    response_field="$explanation"
+                fi
+            else
+                local command=$(echo "$inner_json" | jq -r '.command // empty' 2>/dev/null)
+                if [[ -n "$command" && "$command" != "null" ]]; then
+                    response_field="$command"
+                fi
             fi
         fi
     fi
@@ -462,6 +489,9 @@ smart_accept_line() {
     local llm_response
     llm_response=$(_call_llm "$user_command" "$mode")
     if [[ $? -ne 0 ]]; then
+        if [[ -n "$llm_response" ]]; then
+            echo -e "$llm_response" >&2
+        fi
         BUFFER=""
         zle redisplay
         return
@@ -722,22 +752,12 @@ for cmd in curl jq; do
 done
 
 # İlk kurulum kontrolü
-if [[ ! -f "$SMART_EXECUTE_CONFIG_DIR/.smart_execute_security.conf" ]]; then
+if [[ ! -f "$SMART_EXECUTE_CONFIG_DIR/.smart_execute_security.conf" && ! -f "$SMART_EXECUTE_CONFIG_DIR/security.conf" ]]; then
     echo "🚀 Smart Execute v2.0 ilk kez çalışıyor!"
     echo "Kurulum sihirbazını çalıştırmak için: smart-execute setup"
     
     # Temel yapılandırmayı oluştur
     mkdir -p "$SMART_EXECUTE_CONFIG_DIR"
-    
-    # Güvenlik yapılandırmasını kopyala
-    if [[ -f "$SMART_EXECUTE_DIR/.smart_execute_security.conf" ]]; then
-        cp "$SMART_EXECUTE_DIR/.smart_execute_security.conf" "$SMART_EXECUTE_CONFIG_DIR/"
-    fi
-fi
-
-# Yapılandırmayı yükle
-if [[ -f "$SMART_EXECUTE_CONFIG_DIR/.smart_execute_security.conf" ]]; then
-    source "$SMART_EXECUTE_CONFIG_DIR/.smart_execute_security.conf"
 fi
 
 # Listeleri yükle

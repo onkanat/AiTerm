@@ -3,20 +3,20 @@
 # Bu dosya çoklu LLM sağlayıcı desteğini içerir
 
 # LLM Provider yapılandırması
-declare -A LLM_PROVIDERS=(
-    ["ollama"]="http://localhost:11434/api/generate"
-    ["ollama_remote"]="http://192.168.1.14:11434/api/generate"
-    ["openai"]="https://api.openai.com/v1/chat/completions"
-    ["anthropic"]="https://api.anthropic.com/v1/messages"
-    ["gemini"]="https://generativelanguage.googleapis.com/v1beta/models"
+typeset -gA LLM_PROVIDERS=(
+    "ollama" "http://localhost:11434/api/generate"
+    "ollama_remote" "http://192.168.1.14:11434/api/generate"
+    "openai" "https://api.openai.com/v1/chat/completions"
+    "anthropic" "https://api.anthropic.com/v1/messages"
+    "gemini" "https://generativelanguage.googleapis.com/v1beta/models"
 )
 
-declare -A LLM_MODELS=(
-    ["ollama"]="${LLM_MODEL:-gemma3:1b-it-qat}"
-    ["ollama_remote"]="devstral-small-2:latest"
-    ["openai"]="gpt-3.5-turbo"
-    ["anthropic"]="claude-3-sonnet-20240229"
-    ["gemini"]="gemini-3.1-pro-preview"
+typeset -gA LLM_MODELS=(
+    "ollama" "${LLM_MODEL:-gemma3:1b-it-qat}"
+    "ollama_remote" "devstral-small-2:latest"
+    "openai" "gpt-3.5-turbo"
+    "anthropic" "claude-3-sonnet-20240229"
+    "gemini" "gemini-3.1-pro-preview"
 )
 
 # Sorgu karmaşıklığını değerlendirme
@@ -156,6 +156,8 @@ _call_llm_with_fallback() {
     local mode="$2"
     local primary_provider=$(_select_best_provider "$prompt")
     
+    echo -n $'\n\e[2m🧠 LLM düşünüyor...\e[0m' >&2
+    
     # Sırasıyla dene: Primary -> Local Ollama -> Remote Ollama
     local providers_to_try=("$primary_provider" "ollama" "ollama_remote")
     
@@ -170,12 +172,14 @@ _call_llm_with_fallback() {
         if [[ $? -eq 0 && -n "$raw_response" ]]; then
             local response=$(_parse_provider_response "$provider" "$raw_response" "$mode")
             if [[ -n "$response" && "$response" != "null" && "$response" != "" ]]; then
+                echo -ne "\r\e[K" >&2
                 echo "$response"
                 return 0
             fi
         fi
     done
     
+    echo -ne "\r\e[K" >&2
     return 1
 }
 
@@ -201,14 +205,28 @@ _parse_provider_response() {
             ;;
     esac
     
+    # Fallback: if parsed_text is empty and raw_response is valid JSON error or just text
+    if [[ -z "$parsed_text" ]]; then
+        parsed_text="$raw_response"
+    fi
+    
     # JSON içinden asıl veriyi çek
     if echo "$parsed_text" | jq . >/dev/null 2>&1; then
+        local content=""
         if [[ "$mode" == "explanation" ]]; then
-            echo "$parsed_text" | jq -r '.explanation // empty'
+            content=$(echo "$parsed_text" | jq -r '.explanation // .command // .response // empty' 2>/dev/null)
         else
-            echo "$parsed_text" | jq -r '.command // empty'
+            content=$(echo "$parsed_text" | jq -r '.command // .explanation // .response // empty' 2>/dev/null)
+        fi
+        
+        if [[ -n "$content" && "$content" != "null" ]]; then
+            echo "$content"
+        else
+            # JSON ama istenen alanlar yoksa ham text'i dön (veya tüm JSON'ı)
+            echo "$parsed_text"
         fi
     else
+        # JSON değilse ham text'i dön
         echo "$parsed_text"
     fi
 }

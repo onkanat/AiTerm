@@ -1,0 +1,396 @@
++fix_test.zsh:1> source src/core/smart_execute_v2.zsh
++src/core/smart_execute_v2.zsh:39> SMART_EXECUTE_CONFIG_DIR=/Users/hakankilicaslan/.config/smart_execute 
++src/core/smart_execute_v2.zsh:40> SMART_EXECUTE_DIR=+src/core/smart_execute_v2.zsh:40> dirname src/core/smart_execute_v2.zsh
++src/core/smart_execute_v2.zsh:40> SMART_EXECUTE_DIR=src/core 
++src/core/smart_execute_v2.zsh:43> AUDIT_LOG=/Users/hakankilicaslan/.config/smart_execute/audit.log 
++src/core/smart_execute_v2.zsh:44> LOG_FILE=/Users/hakankilicaslan/.config/smart_execute/log.txt 
++src/core/smart_execute_v2.zsh:47> typeset -g BLACKLIST_PATTERNS=( )
++src/core/smart_execute_v2.zsh:48> typeset -g WHITELIST_PATTERNS=( )
++src/core/smart_execute_v2.zsh:69> _smart_source_module security.zsh
++_smart_source_module:1> local module_name=security.zsh
++_smart_source_module:4> [[ -f src/core/security.zsh ]]
++_smart_source_module:7> [[ -f src/core/../modules/security.zsh ]]
++_smart_source_module:8> source src/core/../modules/security.zsh
++src/core/../modules/security.zsh:225> _load_security_config
++_load_security_config:1> local config_file=/Users/hakankilicaslan/.config/smart_execute/.smart_execute_security.conf
++_load_security_config:2> [[ -f /Users/hakankilicaslan/.config/smart_execute/.smart_execute_security.conf ]]
++_load_security_config:6> SECURITY_LEVEL=2 
++_load_security_config:7> MAX_COMMAND_LENGTH=1000 
++_load_security_config:8> RATE_LIMIT_PER_MINUTE=20 
++_load_security_config:9> SESSION_TIMEOUT=1800 
++_load_security_config:10> ENABLE_AUDIT_LOG=true 
++_load_security_config:11> ENABLE_ANOMALY_DETECTION=true 
++src/core/smart_execute_v2.zsh:70> _smart_source_module cache.zsh
++_smart_source_module:1> local module_name=cache.zsh
++_smart_source_module:4> [[ -f src/core/cache.zsh ]]
++_smart_source_module:7> [[ -f src/core/../modules/cache.zsh ]]
++_smart_source_module:8> source src/core/../modules/cache.zsh
++src/core/../modules/cache.zsh:6> CACHE_DIR=/Users/hakankilicaslan/.config/smart_execute/cache 
++src/core/../modules/cache.zsh:7> CACHE_TTL=3600 
++src/core/../modules/cache.zsh:125> _init_cache
++_init_cache:1> [[ '' != true ]]
++_init_cache:1> return 0
++src/core/smart_execute_v2.zsh:71> _smart_source_module providers.zsh
++_smart_source_module:1> local module_name=providers.zsh
++_smart_source_module:4> [[ -f src/core/providers.zsh ]]
++_smart_source_module:7> [[ -f src/core/../modules/providers.zsh ]]
++_smart_source_module:8> source src/core/../modules/providers.zsh
++src/core/../modules/providers.zsh:6> typeset -gA LLM_PROVIDERS=( ollama http://localhost:11434/api/generate ollama_remote http://192.168.1.14:11434/api/generate openai https://api.openai.com/v1/chat/completions anthropic https://api.anthropic.com/v1/messages gemini https://generativelanguage.googleapis.com/v1beta/models )
++src/core/../modules/providers.zsh:14> typeset -gA LLM_MODELS=( ollama gemma3:1b-it-qat ollama_remote devstral-small-2:latest openai gpt-3.5-turbo anthropic claude-3-sonnet-20240229 gemini gemini-3.1-pro-preview )
++src/core/smart_execute_v2.zsh:72> _smart_source_module cross_shell.zsh
++_smart_source_module:1> local module_name=cross_shell.zsh
++_smart_source_module:4> [[ -f src/core/cross_shell.zsh ]]
++_smart_source_module:7> [[ -f src/core/../modules/cross_shell.zsh ]]
++_smart_source_module:8> source src/core/../modules/cross_shell.zsh
++src/core/smart_execute_v2.zsh:73> _smart_source_module wizard.zsh
++_smart_source_module:1> local module_name=wizard.zsh
++_smart_source_module:4> [[ -f src/core/wizard.zsh ]]
++_smart_source_module:7> [[ -f src/core/../modules/wizard.zsh ]]
++_smart_source_module:8> source src/core/../modules/wizard.zsh
++src/core/smart_execute_v2.zsh:96> LLM_URL=http://localhost:11434/api/generate 
++src/core/smart_execute_v2.zsh:97> LLM_MODEL=gemma3:1b-it-qat 
++src/core/smart_execute_v2.zsh:98> LLM_TIMEOUT=60 
++src/core/smart_execute_v2.zsh:99> LLM_PROVIDER=ollama 
++src/core/smart_execute_v2.zsh:100> FALLBACK_PROVIDER=ollama 
++src/core/smart_execute_v2.zsh:103> SECURITY_LEVEL=2 
++src/core/smart_execute_v2.zsh:104> MAX_COMMAND_LENGTH=1000 
++src/core/smart_execute_v2.zsh:105> MAX_RISK_SCORE=3 
++src/core/smart_execute_v2.zsh:106> RATE_LIMIT_PER_MINUTE=20 
++src/core/smart_execute_v2.zsh:107> SESSION_TIMEOUT=1800 
++src/core/smart_execute_v2.zsh:110> ENABLE_CACHE=true 
++src/core/smart_execute_v2.zsh:111> ENABLE_AUDIT_LOG=true 
++src/core/smart_execute_v2.zsh:112> ENABLE_ANOMALY_DETECTION=true 
++src/core/smart_execute_v2.zsh:113> ENABLE_SANDBOX=false 
++src/core/smart_execute_v2.zsh:116> CACHE_TTL=3600 
++src/core/smart_execute_v2.zsh:119> _smart_load_config
++_smart_load_config:1> local config_paths=( /Users/hakankilicaslan/.config/smart_execute/.smart_execute_security.conf /Users/hakankilicaslan/.config/smart_execute/security.conf src/core/security.conf src/core/.smart_execute_security.conf )
++_smart_load_config:8> config_path=/Users/hakankilicaslan/.config/smart_execute/.smart_execute_security.conf
++_smart_load_config:9> [[ -f /Users/hakankilicaslan/.config/smart_execute/.smart_execute_security.conf ]]
++_smart_load_config:8> config_path=/Users/hakankilicaslan/.config/smart_execute/security.conf
++_smart_load_config:9> [[ -f /Users/hakankilicaslan/.config/smart_execute/security.conf ]]
++_smart_load_config:8> config_path=src/core/security.conf
++_smart_load_config:9> [[ -f src/core/security.conf ]]
++_smart_load_config:8> config_path=src/core/.smart_execute_security.conf
++_smart_load_config:9> [[ -f src/core/.smart_execute_security.conf ]]
++src/core/smart_execute_v2.zsh:122> BLACKLIST_FILE=/Users/hakankilicaslan/.config/smart_execute/blacklist.txt 
++src/core/smart_execute_v2.zsh:123> WHITELIST_FILE=/Users/hakankilicaslan/.config/smart_execute/whitelist.txt 
++src/core/smart_execute_v2.zsh:126> SYSTEM_MESSAGE=$'Sen Linux/macOS terminal uzmanısın. Kullanıcı isteklerini analiz edip SADECE JSON formatında yanıt veriyorsun.\n\nKRİTİK KURALLAR:\n1. SADECE JSON formatında yanıt ver, başka hiçbir şey yazma.\n2. JSON objesi tek satırda olmalı, hiç yeni satır olmasın.\n3. Türkçe karakterleri doğru encode et.\n\nMODLAR VE FORMATLAR:\nA) KOMUT MODU (Kullanıcı bir işlem yaptırmak istiyorsa):\n   Format: {"command":"buraya_komut"}\n   Örnek: {"command":"ls -l"}\n   \nB) AÇIKLAMA MODU (Kullanıcı \'@?\' ile sorduysa veya açıklama istiyorsa):\n   Format: {"explanation":"buraya_aciklama"}\n   Örnek: {"explanation":"ls komutu dosyaları listeler."}\n\nTEHLİKELİ KOMUTLAR:\nTehlikeli veya riskli isteklerde: {"command":"DANGER", "explanation":"DANGER"}\n\nHATIRLA: Sadece istenen modun JSON anahtarını kullan. Tek satır, tek JSON.' 
++src/core/smart_execute_v2.zsh:733> alias 'smart-execute=smart_execute_command'
++src/core/smart_execute_v2.zsh:738> cmd=curl
++src/core/smart_execute_v2.zsh:739> command -v curl
++src/core/smart_execute_v2.zsh:738> cmd=jq
++src/core/smart_execute_v2.zsh:739> command -v jq
++src/core/smart_execute_v2.zsh:746> [[ ! -f /Users/hakankilicaslan/.config/smart_execute/.smart_execute_security.conf && ! -f /Users/hakankilicaslan/.config/smart_execute/security.conf ]]
++src/core/smart_execute_v2.zsh:747> echo '🚀 Smart Execute v2.0 ilk kez çalışıyor!'
++src/core/smart_execute_v2.zsh:748> echo 'Kurulum sihirbazını çalıştırmak için: smart-execute setup'
++src/core/smart_execute_v2.zsh:751> mkdir -p /Users/hakankilicaslan/.config/smart_execute
++src/core/smart_execute_v2.zsh:755> _smart_load_lists
++_smart_load_lists:2> BLACKLIST_PATTERNS=( ) 
++_smart_load_lists:5> [[ ! -f /Users/hakankilicaslan/.config/smart_execute/blacklist.txt ]]
++_smart_load_lists:11> [[ -f /Users/hakankilicaslan/.config/smart_execute/whitelist.txt ]]
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n '# Güvenli ve sık kullanılan komutlar' && '# Güvenli ve sık kullanılan komutlar' != \#* ]]
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n ls && ls != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( ls ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n 'ls -l' && 'ls -l' != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( 'ls -l' ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n 'ls -la' && 'ls -la' != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( 'ls -la' ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n 'ls -lh' && 'ls -lh' != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( 'ls -lh' ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n cd && cd != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( cd ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n pwd && pwd != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( pwd ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n 'git status' && 'git status' != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( 'git status' ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n 'git diff' && 'git diff' != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( 'git diff' ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n 'git log' && 'git log' != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( 'git log' ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n 'git pull' && 'git pull' != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( 'git pull' ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n 'git push' && 'git push' != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( 'git push' ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n source && source != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( source ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n which && which != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( which ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n whereis && whereis != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( whereis ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n man && man != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( man ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n whoami && whoami != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( whoami ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n clear && clear != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( clear ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n history && history != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( history ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n echo && echo != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( echo ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n cat && cat != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( cat ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n tail && tail != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( tail ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n head && head != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( head ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n grep && grep != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( grep ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n date && date != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( date ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n uname && uname != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( uname ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n ps && ps != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( ps ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n jobs && jobs != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( jobs ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n df && df != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( df ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n du && du != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( du ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n free && free != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( free ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n uptime && uptime != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( uptime ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n env && env != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( env ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++_smart_load_lists:13> [[ -n printenv && printenv != \#* ]]
++_smart_load_lists:13> WHITELIST_PATTERNS+=( printenv ) 
++_smart_load_lists:12> IFS='' +_smart_load_lists:12> read -r line
++src/core/smart_execute_v2.zsh:758> [[+src/core/smart_execute_v2.zsh:758> whence -w _init_cache
++src/core/smart_execute_v2.zsh:758> [[ '_init_cache: function' == *function* ]]
++src/core/smart_execute_v2.zsh:759> _init_cache
++_init_cache:1> [[ true != true ]]
++_init_cache:2> mkdir -p /Users/hakankilicaslan/.config/smart_execute/cache
++src/core/smart_execute_v2.zsh:763> [[+src/core/smart_execute_v2.zsh:763> whence -w _cleanup_cache
++src/core/smart_execute_v2.zsh:763> [[ '_cleanup_cache: function' == *function* ]]
++src/core/smart_execute_v2.zsh:764> _cleanup_cache
++_cleanup_cache:1> [[ true != true ]]
++_cleanup_cache:2> [[ ! -d /Users/hakankilicaslan/.config/smart_execute/cache ]]
++_cleanup_cache:4> date +%s
++src/core/smart_execute_v2.zsh:773> [[+src/core/smart_execute_v2.zsh:773> whence -w setup_cross_shell_support
++src/core/smart_execute_v2.zsh:773> [[ 'setup_cross_shell_support: function' == *function* ]]
++src/core/smart_execute_v2.zsh:774> setup_cross_shell_support
++setup_cross_shell_support:1> detect_shell
++detect_shell:1> [[ -n 5.9 ]]
++detect_shell:2> echo zsh
++setup_cross_shell_support:1> local current_shell=zsh
++setup_cross_shell_support:3> echo 'Mevcut shell: zsh'
++setup_cross_shell_support:5> case zsh (bash)
++setup_cross_shell_support:5> case zsh (fish)
++setup_cross_shell_support:5> case zsh (zsh)
++setup_cross_shell_support:13> echo '✓ Zsh desteği varsayılan olarak mevcuttur'
++_cleanup_cache:4> local current_time=1771606725
++_cleanup_cache:5> local cleaned_count=0
++_cleanup_cache:8> setopt NULL_GLOB
++_cleanup_cache:20> unsetopt NULL_GLOB
++_cleanup_cache:22> [[ 0 -gt 0 ]]
++src/core/smart_execute_v2.zsh:778> zle -N smart_accept_line
++src/core/smart_execute_v2.zsh:779> bindkey '^M' smart_accept_line
++src/core/smart_execute_v2.zsh:780> bindkey '^J' smart_accept_line
++src/core/smart_execute_v2.zsh:783> _smart_log SYSTEM 'Smart Execute v2.0 loaded successfully'
++_smart_log:1> mkdir -p /Users/hakankilicaslan/.config/smart_execute
++_smart_log:2> date '+%Y-%m-%d %H:%M:%S'
++_smart_log:2> local timestamp='2026-02-20 19:58:45'
++_smart_log:3> echo '2026-02-20 19:58:45 | SYSTEM | Smart Execute v2.0 loaded successfully'
++_smart_log:6> [[+_smart_log:6> whence -w _audit_log
++_smart_log:6> [[ '_audit_log: function' == *function* ]]
++_smart_log:6> _audit_log SYSTEM SYSTEM 'Smart Execute v2.0 loaded successfully'
++_audit_log:1> [[ true != true ]]
++_audit_log:3> local level=SYSTEM
++_audit_log:4> local action=SYSTEM
++_audit_log:5> local details='Smart Execute v2.0 loaded successfully'
++_audit_log:6> date '+%Y-%m-%d %H:%M:%S'
++_audit_log:6> local timestamp='2026-02-20 19:58:45'
++_audit_log:7> whoami
++_audit_log:7> local user=hakankilicaslan
++_audit_log:8> local pid=94837
++_audit_log:9> tty
++_audit_log:9> local tty=/dev/ttys005
++_audit_log:10> local pwd=/Users/hakankilicaslan/GitHub/AiTerm
++_audit_log:12> echo '2026-02-20 19:58:45|SYSTEM|hakankilicaslan|94837|/dev/ttys005|/Users/hakankilicaslan/GitHub/AiTerm|SYSTEM|Smart Execute v2.0 loaded successfully'
++src/core/smart_execute_v2.zsh:785> echo '✅ Smart Execute v2.0 yüklendi!'
++src/core/smart_execute_v2.zsh:786> echo '📚 Yardım için: smart-execute help'
++src/core/smart_execute_v2.zsh:787> echo '⚙️  Kurulum için: smart-execute setup'
++fix_test.zsh:3> BUFFER='@list files' 
++fix_test.zsh:7> smart_accept_line
++smart_accept_line:1> local original_command='@list files'
++smart_accept_line:2> local user_command
++smart_accept_line:3> local mode
++smart_accept_line:6> [[ -z '@list files' ]]
++smart_accept_line:12> [[ '@list files' == /* ]]
++smart_accept_line:19> [[ '@list files' == @\?* ]]
++smart_accept_line:22> [[ '@list files' == @* ]]
++smart_accept_line:23> mode=command 
++smart_accept_line:24> user_command='list files' 
++smart_accept_line:32> user_command='list files' 
++smart_accept_line:33> user_command='list files' 
++smart_accept_line:34> user_command=+smart_accept_line:34> echo 'list files'
++smart_accept_line:34> user_command=+smart_accept_line:34> sed 's/^ *//;s/ *$//'
++smart_accept_line:34> user_command='list files' 
++smart_accept_line:36> [[ -z 'list files' ]]
++smart_accept_line:44> _check_llm_connection
++_check_llm_connection:2> [[ ollama != ollama ]]
++_check_llm_connection:7> curl -s --max-time 5 http://localhost:11434/api/generate
++_check_llm_connection:14> local model_info
++_check_llm_connection:15> model_info=+_check_llm_connection:15> curl -s -X POST http://localhost:11434/api/generate/show -d '{"name": "gemma3:1b-it-qat"}'
++_check_llm_connection:15> model_info='404 page not found' 
++_check_llm_connection:18> [[ -n '404 page not found' ]]
++_check_llm_connection:18> echo '404 page not found'
++_check_llm_connection:18> jq .
++_check_llm_connection:32> return 0
++smart_accept_line:51> [[ command == command ]]
++smart_accept_line:51> _is_whitelisted 'list files'
++_is_whitelisted:1> local input_command='list files'
++_is_whitelisted:2> [[ 33 -eq 0 ]]
++_is_whitelisted:3> pattern=ls
++_is_whitelisted:4> [[ 'list files' == ls ]]
++_is_whitelisted:3> pattern=ls -l
++_is_whitelisted:4> [[ 'list files' == ls\ -l ]]
++_is_whitelisted:3> pattern=ls -la
++_is_whitelisted:4> [[ 'list files' == ls\ -la ]]
++_is_whitelisted:3> pattern=ls -lh
++_is_whitelisted:4> [[ 'list files' == ls\ -lh ]]
++_is_whitelisted:3> pattern=cd
++_is_whitelisted:4> [[ 'list files' == cd ]]
++_is_whitelisted:3> pattern=pwd
++_is_whitelisted:4> [[ 'list files' == pwd ]]
++_is_whitelisted:3> pattern=git status
++_is_whitelisted:4> [[ 'list files' == git\ status ]]
++_is_whitelisted:3> pattern=git diff
++_is_whitelisted:4> [[ 'list files' == git\ diff ]]
++_is_whitelisted:3> pattern=git log
++_is_whitelisted:4> [[ 'list files' == git\ log ]]
++_is_whitelisted:3> pattern=git pull
++_is_whitelisted:4> [[ 'list files' == git\ pull ]]
++_is_whitelisted:3> pattern=git push
++_is_whitelisted:4> [[ 'list files' == git\ push ]]
++_is_whitelisted:3> pattern=source
++_is_whitelisted:4> [[ 'list files' == source ]]
++_is_whitelisted:3> pattern=which
++_is_whitelisted:4> [[ 'list files' == which ]]
++_is_whitelisted:3> pattern=whereis
++_is_whitelisted:4> [[ 'list files' == whereis ]]
++_is_whitelisted:3> pattern=man
++_is_whitelisted:4> [[ 'list files' == man ]]
++_is_whitelisted:3> pattern=whoami
++_is_whitelisted:4> [[ 'list files' == whoami ]]
++_is_whitelisted:3> pattern=clear
++_is_whitelisted:4> [[ 'list files' == clear ]]
++_is_whitelisted:3> pattern=history
++_is_whitelisted:4> [[ 'list files' == history ]]
++_is_whitelisted:3> pattern=echo
++_is_whitelisted:4> [[ 'list files' == echo ]]
++_is_whitelisted:3> pattern=cat
++_is_whitelisted:4> [[ 'list files' == cat ]]
++_is_whitelisted:3> pattern=tail
++_is_whitelisted:4> [[ 'list files' == tail ]]
++_is_whitelisted:3> pattern=head
++_is_whitelisted:4> [[ 'list files' == head ]]
++_is_whitelisted:3> pattern=grep
++_is_whitelisted:4> [[ 'list files' == grep ]]
++_is_whitelisted:3> pattern=date
++_is_whitelisted:4> [[ 'list files' == date ]]
++_is_whitelisted:3> pattern=uname
++_is_whitelisted:4> [[ 'list files' == uname ]]
++_is_whitelisted:3> pattern=ps
++_is_whitelisted:4> [[ 'list files' == ps ]]
++_is_whitelisted:3> pattern=jobs
++_is_whitelisted:4> [[ 'list files' == jobs ]]
++_is_whitelisted:3> pattern=df
++_is_whitelisted:4> [[ 'list files' == df ]]
++_is_whitelisted:3> pattern=du
++_is_whitelisted:4> [[ 'list files' == du ]]
++_is_whitelisted:3> pattern=free
++_is_whitelisted:4> [[ 'list files' == free ]]
++_is_whitelisted:3> pattern=uptime
++_is_whitelisted:4> [[ 'list files' == uptime ]]
++_is_whitelisted:3> pattern=env
++_is_whitelisted:4> [[ 'list files' == env ]]
++_is_whitelisted:3> pattern=printenv
++_is_whitelisted:4> [[ 'list files' == printenv ]]
++_is_whitelisted:9> return 1
++smart_accept_line:58> [[ command == command ]]
++smart_accept_line:58> _is_blacklisted 'list files'
++_is_blacklisted:2> local input='list files'
++_is_blacklisted:5> case list files (rm\ -rf\ /*)
++_is_blacklisted:5> case list files (shutdown*)
++_is_blacklisted:5> case list files (reboot*)
++_is_blacklisted:5> case list files (halt*)
++_is_blacklisted:5> case list files (poweroff*)
++_is_blacklisted:5> case list files (*rm\ -rf*)
++_is_blacklisted:5> case list files (*dd\ if=*of=/dev/*)
++_is_blacklisted:5> case list files (*)
++_is_blacklisted:13> return 1
++smart_accept_line:67> local llm_response
++smart_accept_line:68> llm_response=+smart_accept_line:68> _call_llm 'list files' command
++_call_llm:1> local user_prompt='list files'
++_call_llm:2> local mode=command
++_call_llm:3> local full_prompt
++_call_llm:6> [[+_call_llm:6> whence -w _check_session_timeout
++_call_llm:6> [[ '_check_session_timeout: function' == *function* ]]
++_call_llm:7> _check_session_timeout
++_check_session_timeout:1> local session_file=/Users/hakankilicaslan/.config/smart_execute/.session
++_check_session_timeout:2> date +%s
++_check_session_timeout:2> local current_time=1771606725
++_check_session_timeout:4> [[ -f /Users/hakankilicaslan/.config/smart_execute/.session ]]
++_check_session_timeout:5> cat /Users/hakankilicaslan/.config/smart_execute/.session
++_check_session_timeout:5> local last_activity=1771602649
++_check_session_timeout:6> local time_diff=4076
++_check_session_timeout:8> [[ 4076 -gt 1800 ]]
++_check_session_timeout:9> _audit_log SESSION TIMEOUT 'Inactive for 4076s'
++_audit_log:1> [[ true != true ]]
++_audit_log:3> local level=SESSION
++_audit_log:4> local action=TIMEOUT
++_audit_log:5> local details='Inactive for 4076s'
++_audit_log:6> date '+%Y-%m-%d %H:%M:%S'
++_audit_log:6> local timestamp='2026-02-20 19:58:45'
++_audit_log:7> whoami
++_audit_log:7> local user=hakankilicaslan
++_audit_log:8> local pid=94837
++_audit_log:9> tty
++_audit_log:9> local tty=/dev/ttys005
++_audit_log:10> local pwd=/Users/hakankilicaslan/GitHub/AiTerm
++_audit_log:12> echo '2026-02-20 19:58:45|SESSION|hakankilicaslan|94837|/dev/ttys005|/Users/hakankilicaslan/GitHub/AiTerm|TIMEOUT|Inactive for 4076s'
++_check_session_timeout:10> echo '⚠️  Oturum zaman aşımına uğradı. Yeniden kimlik doğrulama gerekli.'
++_check_session_timeout:11> return 1
++_call_llm:7> return 1
++smart_accept_line:68> llm_response='⚠️  Oturum zaman aşımına uğradı. Yeniden kimlik doğrulama gerekli.' 
++smart_accept_line:69> [[ 1 -ne 0 ]]
++smart_accept_line:70> BUFFER='' 
++smart_accept_line:71> zle redisplay
++zle:0> echo 'zle called with: redisplay'
++smart_accept_line:72> return
