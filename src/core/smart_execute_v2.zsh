@@ -389,16 +389,20 @@ _check_llm_connection() {
         return 0
     fi
 
-    # Sunucunun ayakta olup olmadığını kontrol et
-    if ! curl -s --max-time 5 "$LLM_URL" >/dev/null; then
-        echo -e "\n\e[1;31m❌ Hata: LLM sunucusuna bağlanılamadı ($LLM_URL).\e[0m"
+    # Ollama base URL'ini türet (generate endpoint yerine kökü kullan)
+    local ollama_base_url="${LLM_URL%/api/generate}"
+    ollama_base_url="${ollama_base_url%/api/chat}"
+
+    # Sunucunun ayakta olup olmadığını kontrol et (/api/tags her zaman GET ile çalışır)
+    if ! curl -s --max-time 5 "${ollama_base_url}/api/tags" >/dev/null; then
+        echo -e "\n\e[1;31m❌ Hata: LLM sunucusuna bağlanılamadı (${ollama_base_url}).\e[0m"
         echo -e "\e[33mℹ️  Lütfen Ollama'nın çalıştığından emin olun. Başlatmak için: \e[1mollama serve\e[0m"
         return 1
     fi
 
-    # Modelin varlığını kontrol et
+    # Modelin varlığını kontrol et (doğru endpoint: /api/show)
     local model_info
-    model_info=$(curl -s -X POST "$LLM_URL/show" -d "{\"name\": \"$LLM_MODEL\"}" 2>/dev/null)
+    model_info=$(curl -s -X POST "${ollama_base_url}/api/show" -d "{\"name\": \"$LLM_MODEL\"}" 2>/dev/null)
     
     # JSON geçerli mi kontrol et
     if [[ -n "$model_info" ]] && echo "$model_info" | jq . >/dev/null 2>&1; then
@@ -424,6 +428,13 @@ smart_accept_line() {
     local original_command="$BUFFER"
     local user_command
     local mode
+
+    # ── Guard 1: VSCode / Cursor / Windsurf shell integration bypass ──
+    # Bu ortamlar kendi ^M hook'larını kullanır; çakışmayı önleriz.
+    if [[ -n "${VSCODE_SHELL_INTEGRATION:-}" || "${TERM_PROGRAM:-}" == "vscode" ]]; then
+        zle .accept-line
+        return
+    fi
 
     # Boş komut kontrolü
     if [[ -z "$original_command" ]]; then
@@ -557,6 +568,16 @@ smart_accept_line() {
     if [[ "$(whence -w _assess_risk 2>/dev/null)" == *function* ]]; then
         local risk_score=$(_assess_risk "$suggested_command")
         [[ $risk_score -gt 2 ]] && echo -e "\e[33m⚠️  Risk Seviyesi: $risk_score\e[0m"
+    fi
+    
+    # ── Guard 2: TTY kontrolü ──
+    # Pipe, CI veya Antigravity/Gemini agent terminali gibi TTY olmayan
+    # ortamlarda read -k1 bloklanır; bu durumda direkt çalıştırırız.
+    if [[ ! -t 0 ]]; then
+        _smart_log "EXECUTE" "Non-TTY auto-execute | Input: $user_command | Command: $suggested_command"
+        BUFFER=$suggested_command
+        zle .accept-line
+        return
     fi
     
     read -k1 -r '?Çalıştır [E], Düzenle [D], İptal [herhangi bir tuş]? '
@@ -745,10 +766,16 @@ alias smart-execute='smart_execute_command'
 # =================== BAŞLATMA VE KURULUM =====================
 
 # Gerekli araçları kontrol et
+# Non-interactive shell'de (CI/CD, subshell) sadece uyar, scripti durdurma
 for cmd in curl jq; do
     if ! command -v $cmd &> /dev/null; then
-        echo "smart_execute: Hata - '$cmd' komutu bulunamadı. Lütfen kurun." >&2
-        return 1
+        if [[ -o interactive ]]; then
+            echo "smart_execute: Hata - '$cmd' komutu bulunamadı. Lütfen kurun." >&2
+            return 1
+        else
+            # Non-interactive: sessizce çık, pipeline'ı kırma
+            return 0
+        fi
     fi
 done
 
@@ -784,10 +811,14 @@ if [[ "$(whence -w setup_cross_shell_support 2>/dev/null)" == *function* ]]; the
     setup_cross_shell_support
 fi
 
-# ZLE widget'ını kaydet
-zle -N smart_accept_line
-bindkey '^M' smart_accept_line
-bindkey '^J' smart_accept_line
+# ── Guard 3: Interactive-only ZLE bağlamaları ──
+# Non-interactive shell'de (CI/CD, script, pipe) ZLE yoktur;
+# yüklemeye çalışmak 'zle: no current binding' hatası üretir.
+if [[ -o interactive ]]; then
+    zle -N smart_accept_line
+    bindkey '^M' smart_accept_line
+    bindkey '^J' smart_accept_line
+fi
 
 # Başarılı yükleme mesajı
 _smart_log "SYSTEM" "Smart Execute v2.0 loaded successfully"

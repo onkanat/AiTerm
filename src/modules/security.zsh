@@ -119,7 +119,9 @@ _detect_anomalies() {
     [[ $recent_commands -gt 50 ]] && ((anomaly_score += 2))
     
     # Şüpheli komut kalıpları
-    [[ "$command" =~ (curl.*sh|wget.*sh|base64.*exec|python.*-c|perl.*-e) ]] && ((anomaly_score += 3))
+    # NOT: 'python -c' geliştirme ortamlarında geçerli ve sık kullanılır;
+    #      sadece pipe ile shell çalıştırma (curl|sh, wget|bash) gerçek tehlikedir.
+    [[ "$command" =~ (curl[[:space:]].*\|[[:space:]]*(sh|bash|zsh)|wget[[:space:]].*\|[[:space:]]*(sh|bash|zsh)|base64.*exec|eval[[:space:]].*\$) ]] && ((anomaly_score += 3))
     
     # Gece saatlerinde yoğun aktivite (00:00-06:00)
     local hour=$(date '+%H')
@@ -211,8 +213,10 @@ _parse_json_safely() {
 _sanitize_output() {
     local output="$1"
     
-    # Tehlikeli karakterleri temizle
-    output=$(echo "$output" | sed 's/[`$()]//g; s/&&\|;;\||//g')
+    # Sadece gerçekten tehlikeli karakterleri temizle:
+    # backtick (´) eval vektörü olabilir, dokunuyoruz.
+    # &&, |, $() ise meşru shell konstrukciyonlarıdır — koruyoruz.
+    output=$(echo "$output" | sed 's/`//g')
     
     # Uzunluk kontrolü
     if [[ ${#output} -gt $MAX_COMMAND_LENGTH ]]; then

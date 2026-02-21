@@ -3,6 +3,10 @@
 
 set -e
 
+# Script'in konumundan proje kökünü bul
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
 # Renkler
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -99,11 +103,11 @@ INSTALL_DIR="$HOME/.smart_execute"
 mkdir -p "$INSTALL_DIR"
 
 # Ana dosyaları kopyala
-if [[ -f "src/core/smart_execute_v2.zsh" ]]; then
-    cp src/core/smart_execute_v2.zsh "$INSTALL_DIR/"
+if [[ -f "$PROJECT_ROOT/src/core/smart_execute_v2.zsh" ]]; then
+    cp "$PROJECT_ROOT/src/core/smart_execute_v2.zsh" "$INSTALL_DIR/"
     echo -e "${GREEN}✓${NC} Ana dosya kopyalandı"
 else
-    echo -e "${RED}❌ src/core/smart_execute_v2.zsh bulunamadı${NC}"
+    echo -e "${RED}❌ $PROJECT_ROOT/src/core/smart_execute_v2.zsh bulunamadı${NC}"
     exit 1
 fi
 
@@ -119,8 +123,8 @@ modules=(
 )
 
 for module in "${modules[@]}"; do
-    if [[ -f "$module" ]]; then
-        cp "$module" "$INSTALL_DIR/"
+    if [[ -f "$PROJECT_ROOT/$module" ]]; then
+        cp "$PROJECT_ROOT/$module" "$INSTALL_DIR/"
         echo -e "${GREEN}✓${NC} $module kopyalandı"
     fi
 done
