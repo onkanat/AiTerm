@@ -53,7 +53,7 @@
 ### 📊 Model Karşılaştırma Tablosu
 
 | Model | Hız | Doğruluk | Güvenlik | Maliyet | Terminal Uygunluğu |
-|-------|-----|----------|----------|---------|-------------------|
+| --- | --- | --- | --- | --- | --- |
 | CodeLlama 7B | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
 | Llama 3.1 8B | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
 | GPT-4o Mini | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
@@ -64,6 +64,7 @@
 ### 📋 Mevcut Durumun Analizi
 
 **Mevcut Prompt'taki Sorunlar:**
+
 - Türkçe/İngilizce karışıklığı
 - JSON format garantisi yetersiz  
 - Güvenlik tespiti belirsiz
@@ -114,6 +115,7 @@
 ### 🎨 Dil-Özel Prompt Varyantları
 
 #### **Türkçe Optimized Prompt**
+
 ```bash
 SYSTEM_MESSAGE_TR="Sen uzman bir Linux/macOS terminal asistanısın. SADECE geçerli JSON formatında yanıt ver - başka hiçbir metin, açıklama veya format kullanma.
 
@@ -133,6 +135,7 @@ TEHLİKELİ ÖRÜNTÜLER: sistem yıkımı, yetki yükseltme, ağ saldırıları
 ```
 
 #### **English Optimized Prompt**
+
 ```bash
 SYSTEM_MESSAGE_EN="You are an expert Linux/macOS terminal assistant. Respond with ONLY valid JSON - no other text, explanations, or formatting.
 
@@ -274,6 +277,33 @@ _assess_response_quality() {
     
     echo $score
 }
+```
+
+## 🛠️ Troubleshooting
+
+### Yaygın Sorunlar
+
+#### JSON Parse Hatası
+
+```bash
+# Çözüm: Enhanced prompts kullan
+source ./enhanced_prompts.zsh
+response=$(_call_llm_enhanced "query" "command")
+```
+
+#### Yavaş Yanıt
+
+```bash
+# Çözüm: Daha hızlı model kullan
+export LLM_MODEL="codellama:7b-instruct"
+export LLM_TIMEOUT=15
+```
+
+#### Güvenlik False Positive
+
+```bash
+# Çözüm: Security threshold ayarla
+export SECURITY_THRESHOLD=0.8
 ```
 
 Bu öneriler Smart Execute v2.0 için optimize edilmiş model seçimi ve prompt engineering stratejisi sunuyor. Özellikle terminal kullanımı için tasarlanmış modeller ve güvenlik odaklı prompt'lar kullanarak daha iyi sonuçlar elde edebilirsiniz.

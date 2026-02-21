@@ -125,9 +125,9 @@ run_tests() {
     test_function_exists "_sanitize_input"
     test_function_exists "_audit_log"
     
-    # Cache modülü fonksiyonları - geçici olarak devre dışı
-    # test_function_exists "_get_cached_response"
-    # test_function_exists "_cache_response"
+    # Cache modülü fonksiyonları
+    test_function_exists "_get_cached_response"
+    test_function_exists "_cache_response"
     
     echo ""
     
@@ -165,24 +165,23 @@ run_tests() {
     
     echo ""
     
-    # Cache testleri - geçici olarak devre dışı
-    echo "💾 Cache Tests (Disabled)"
-    echo "-------------------------"
-    echo "Cache sistemi geçici olarak devre dışı bırakıldı."
+    # Cache testleri
+    echo "💾 Cache Tests"
+    echo "--------------"
     echo ""
     
-    # if [[ "$(whence -w _init_cache 2>/dev/null)" == *function* ]]; then
-    #     ENABLE_CACHE=true
-    #     _init_cache
-    #     
-    #     test_assert "Cache directory created" "[[ -d '$SMART_EXECUTE_CONFIG_DIR/cache' ]] && echo 'exists'" "exists"
-    #     
-    #     # Cache işlevselliğini test et
-    #     if [[ "$(whence -w _cache_response 2>/dev/null)" == *function* ]] && [[ "$(whence -w _get_cached_response 2>/dev/null)" == *function* ]]; then
-    #         _cache_response "test_query" "test_response"
-    #         test_assert "Cache stores and retrieves data" "_get_cached_response 'test_query'" "test_response"
-    #     fi
-    # fi
+    if [[ "$(whence -w _init_cache 2>/dev/null)" == *function* ]]; then
+        ENABLE_CACHE=true
+        _init_cache
+        
+        test_assert "Cache directory created" "[[ -d '$SMART_EXECUTE_CONFIG_DIR/cache' ]] && echo 'exists'" "exists"
+        
+        # Cache işlevselliğini test et
+        if [[ "$(whence -w _cache_response 2>/dev/null)" == *function* ]] && [[ "$(whence -w _get_cached_response 2>/dev/null)" == *function* ]]; then
+            _cache_response "test_query" "test_response"
+            test_assert "Cache stores and retrieves data" "_get_cached_response 'test_query'" "test_response"
+        fi
+    fi
     
     echo ""
     

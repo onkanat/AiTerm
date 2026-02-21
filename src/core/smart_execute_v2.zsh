@@ -285,8 +285,9 @@ _call_llm() {
 
     # Cache kontrolü
     if [[ "$(whence -w _get_cached_response 2>/dev/null)" == *function* ]]; then
-        local cached_response=$(_get_cached_response "$full_prompt")
-        if [[ $? -eq 0 ]]; then
+        local cached_response
+        cached_response=$(_get_cached_response "$full_prompt")
+        if [[ $? -eq 0 && -n "$cached_response" ]]; then
             echo "$cached_response"
             return 0
         fi

@@ -39,10 +39,11 @@ echo -e "${BLUE}🚀 Smart Execute v2.0 Kurulumu Başlıyor...${NC}"
 echo ""
 
 # Shell kontrolü
-if [[ -n "$ZSH_VERSION" ]]; then
+USER_SHELL=$(basename "$SHELL")
+if [[ "$USER_SHELL" == "zsh" ]] || [[ -n "$ZSH_VERSION" ]]; then
     SHELL_TYPE="zsh"
     SHELL_RC="$HOME/.zshrc"
-elif [[ -n "$BASH_VERSION" ]]; then
+elif [[ "$USER_SHELL" == "bash" ]] || [[ -n "$BASH_VERSION" ]]; then
     SHELL_TYPE="bash"
     SHELL_RC="$HOME/.bashrc"
 else

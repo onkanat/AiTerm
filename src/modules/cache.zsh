@@ -54,6 +54,10 @@ _cache_response() {
     
     local query="$1"
     local response="$2"
+    
+    # Boş veya null yanıtları kaydetme
+    [[ -z "$response" || "$response" == "null" ]] && return 0
+    
     local query_hash=$(_calculate_hash "$query")
     local cache_file="$CACHE_DIR/$query_hash"
     
