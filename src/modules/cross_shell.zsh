@@ -15,6 +15,21 @@ detect_shell() {
     fi
 }
 
+# AI Agent tespiti
+_is_ai_agent() {
+    [[ -n "${VSCODE_SHELL_INTEGRATION:-}" ]] && return 0
+    [[ "${TERM_PROGRAM:-}" == "vscode" ]] && return 0
+    [[ "${TERM_PROGRAM:-}" == "cursor" ]] && return 0
+    [[ "${TERM_PROGRAM:-}" == "windsurf" ]] && return 0
+    [[ -n "${GEMINI_CLI:-}" ]] && return 0
+    [[ -n "${ANTIGRAVITY:-}" ]] && return 0
+    [[ -n "${ANTIGARVTY:-}" ]] && return 0
+    [[ -n "${AI_TERMINAL:-}" ]] && return 0
+    [[ -n "${INSIDE_EMACS:-}" ]] && return 0
+    [[ "${TERM:-}" == "dumb" ]] && return 0
+    return 1
+}
+
 # Bash desteği
 setup_bash_support() {
     if [[ -n "$BASH_VERSION" ]]; then
@@ -230,6 +245,11 @@ call_llm_for_explanation() {
 
 # Ana kurulum fonksiyonu
 setup_cross_shell_support() {
+    # AI agent veya non-interactive ise kurulumu atla
+    if _is_ai_agent; then
+        return 0
+    fi
+    
     local current_shell=$(detect_shell)
     
     echo "Mevcut shell: $current_shell"

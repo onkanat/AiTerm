@@ -104,15 +104,19 @@ _call_gemini() {
         return 1
     fi
 
-    # System prompt'u Gemini formatına uyarla
-    local system_instr="Sen Linux/macOS terminal uzmanısın. Kullanıcı isteklerini analiz edip SADECE JSON formatında yanıt veriyorsun. JSON objesi tek satırda olmalı. Türkçe karakterleri doğru encode et. MODLAR: A) KOMUT MODU: {\"command\":\"ls -l\"} B) AÇIKLAMA MODU: {\"explanation\":\"Açıklama...\"}"
+    # Merkezi dinamik prompt'u oluştur
+    local full_prompt
+    if [[ "$(whence -w _get_enhanced_prompt 2>/dev/null)" == *function* ]]; then
+        full_prompt=$(_get_enhanced_prompt "$user_prompt" "$mode")
+    else
+        full_prompt="Sen Linux/macOS terminal uzmanısın. MODLAR: A) KOMUT MODU: {\"command\":\"ls -l\"} B) AÇIKLAMA MODU: {\"explanation\":\"...\"}\n\nİstek: $user_prompt"
+    fi
     
     local json_payload
     json_payload=$(jq -n \
-        --arg sys "$system_instr" \
-        --arg prompt "$user_prompt" \
+        --arg prompt "$full_prompt" \
         '{
-            contents: [{ parts: [{ text: ($sys + "\n\nİstek: " + $prompt) }] }],
+            contents: [{ parts: [{ text: $prompt }] }],
             generationConfig: { response_mime_type: "application/json", temperature: 0.1 }
         }')
 
@@ -136,7 +140,13 @@ _call_ollama() {
         model="${LLM_MODELS[ollama_remote]}"
     fi
     
-    local full_prompt="$SYSTEM_MESSAGE\nİstek: $user_prompt"
+    # Merkezi dinamik prompt'u oluştur
+    local full_prompt
+    if [[ "$(whence -w _get_enhanced_prompt 2>/dev/null)" == *function* ]]; then
+        full_prompt=$(_get_enhanced_prompt "$user_prompt" "$mode")
+    else
+        full_prompt="$SYSTEM_MESSAGE\nİstek: $user_prompt"
+    fi
     
     local json_payload
     json_payload=$(jq -n \
@@ -211,12 +221,17 @@ _parse_provider_response() {
     fi
     
     # JSON içinden asıl veriyi çek
-    if echo "$parsed_text" | jq . >/dev/null 2>&1; then
+    local extracted_json="$parsed_text"
+    if [[ "$(whence -w _extract_json_from_response 2>/dev/null)" == *function* ]]; then
+        extracted_json=$(_extract_json_from_response "$parsed_text")
+    fi
+
+    if echo "$extracted_json" | jq . >/dev/null 2>&1; then
         local content=""
         if [[ "$mode" == "explanation" ]]; then
-            content=$(echo "$parsed_text" | jq -r '.explanation // .command // .response // empty' 2>/dev/null)
+            content=$(echo "$extracted_json" | jq -r '.explanation // .command // .response // empty' 2>/dev/null)
         else
-            content=$(echo "$parsed_text" | jq -r '.command // .explanation // .response // empty' 2>/dev/null)
+            content=$(echo "$extracted_json" | jq -r '.command // .explanation // .response // empty' 2>/dev/null)
         fi
         
         if [[ -n "$content" && "$content" != "null" ]]; then

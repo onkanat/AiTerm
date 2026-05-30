@@ -26,9 +26,9 @@ _audit_log() {
     local action="$2" 
     local details="$3"
     local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-    local user=$(whoami)
+    local user=${USER:-$(whoami)}
     local pid=$$
-    local tty=$(tty 2>/dev/null || echo "unknown")
+    local tty=${TTY:-$(tty 2>/dev/null || echo "unknown")}
     local pwd="$PWD"
     
     echo "$timestamp|$level|$user|$pid|$tty|$pwd|$action|$details" >> "$AUDIT_LOG"
@@ -115,7 +115,7 @@ _detect_anomalies() {
         # macOS date
         five_minutes_ago=$(date -v -5M '+%Y-%m-%d %H:%M' 2>/dev/null || date '+%Y-%m-%d %H:%M')
     fi
-    local recent_commands=$(grep "$five_minutes_ago" "$LOG_FILE" 2>/dev/null | wc -l)
+    local recent_commands=$(tail -n 1000 "$LOG_FILE" 2>/dev/null | grep -c "$five_minutes_ago")
     [[ $recent_commands -gt 50 ]] && ((anomaly_score += 2))
     
     # Şüpheli komut kalıpları

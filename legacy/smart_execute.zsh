@@ -88,6 +88,21 @@ _smart_log() {
     echo "$(date '+%Y-%m-%d %H:%M:%S') | $1 | $2" >> "$LOG_FILE"
 }
 
+# AI Agent tespiti
+_smart_is_ai_agent() {
+    [[ -n "${VSCODE_SHELL_INTEGRATION:-}" ]] && return 0
+    [[ "${TERM_PROGRAM:-}" == "vscode" ]] && return 0
+    [[ "${TERM_PROGRAM:-}" == "cursor" ]] && return 0
+    [[ "${TERM_PROGRAM:-}" == "windsurf" ]] && return 0
+    [[ -n "${GEMINI_CLI:-}" ]] && return 0
+    [[ -n "${ANTIGRAVITY:-}" ]] && return 0
+    [[ -n "${ANTIGARVTY:-}" ]] && return 0
+    [[ -n "${AI_TERMINAL:-}" ]] && return 0
+    [[ -n "${INSIDE_EMACS:-}" ]] && return 0
+    [[ "${TERM:-}" == "dumb" ]] && return 0
+    return 1
+}
+
 # Listeleri diskten global dizilere yükleyen fonksiyon
 _smart_load_lists() {
     # Kara Liste
@@ -458,6 +473,8 @@ done
 
 _smart_load_lists
 
-zle -N smart_accept_line
-bindkey '^M' smart_accept_line
-bindkey '^J' smart_accept_line
+if [[ -o interactive ]] && ! _smart_is_ai_agent; then
+    zle -N smart_accept_line
+    bindkey '^M' smart_accept_line
+    bindkey '^J' smart_accept_line
+fi

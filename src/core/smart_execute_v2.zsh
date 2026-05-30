@@ -84,6 +84,22 @@ _smart_log() {
     [[ "$(whence -w _audit_log 2>/dev/null)" == *function* ]] && _audit_log "$1" "$1" "$2"
 }
 
+# AI Agent tespiti - Bu ortamlarda terminal kontrolünü bozmamak için 
+# otomatik ZLE modifikasyonlarını ve karşılama mesajlarını devre dışı bırakıyoruz.
+_smart_is_ai_agent() {
+    [[ -n "${VSCODE_SHELL_INTEGRATION:-}" ]] && return 0
+    [[ "${TERM_PROGRAM:-}" == "vscode" ]] && return 0
+    [[ "${TERM_PROGRAM:-}" == "cursor" ]] && return 0
+    [[ "${TERM_PROGRAM:-}" == "windsurf" ]] && return 0
+    [[ -n "${GEMINI_CLI:-}" ]] && return 0
+    [[ -n "${ANTIGRAVITY:-}" ]] && return 0
+    [[ -n "${ANTIGARVTY:-}" ]] && return 0
+    [[ -n "${AI_TERMINAL:-}" ]] && return 0
+    [[ -n "${INSIDE_EMACS:-}" ]] && return 0
+    [[ "${TERM:-}" == "dumb" ]] && return 0
+    return 1
+}
+
 # =================== ANA KONFIGÜRASYON =====================
 
 # Yapılandırmayı yükle (çoklu konum desteği)
@@ -110,6 +126,7 @@ LLM_MODEL="gemma3:1b-it-qat"
 LLM_TIMEOUT=60
 LLM_PROVIDER="ollama"
 FALLBACK_PROVIDER="ollama"
+SMART_EXECUTE_LANG="auto"
 
 # Güvenlik ayarları
 SECURITY_LEVEL=2
@@ -134,27 +151,182 @@ _smart_load_config
 BLACKLIST_FILE="${BLACKLIST_FILE:-$SMART_EXECUTE_CONFIG_DIR/blacklist.txt}"
 WHITELIST_FILE="${WHITELIST_FILE:-$SMART_EXECUTE_CONFIG_DIR/whitelist.txt}"
 
-# Gelişmiş sistem mesajı
-SYSTEM_MESSAGE="Sen Linux/macOS terminal uzmanısın. Kullanıcı isteklerini analiz edip SADECE JSON formatında yanıt veriyorsun.
+# Gelişmiş dinamik Türkçe ve İngilizce sistem mesajı şablonları
+SYSTEM_MESSAGE_TR='Sen yetenekli bir Linux ve macOS terminal uzmanısın. Kullanıcıların girdiği doğal dil isteklerini analiz edip, çalıştırılabilir terminal komutları üretir veya komutları açıklarsın.
 
-KRİTİK KURALLAR:
-1. SADECE JSON formatında yanıt ver, başka hiçbir şey yazma.
-2. JSON objesi tek satırda olmalı, hiç yeni satır olmasın.
-3. Türkçe karakterleri doğru encode et.
+KRİTİK FORMAT KURALLARI:
+1. SADECE geçerli bir JSON objesi döndür. JSON objesi dışında hiçbir giriş/geliş cümlesi (örn: "İşte komutunuz:", "```json", vb.) yazma.
+2. JSON objesi tek satırda olmalı, hiç yeni satır (newline) içermemelidir.
+3. JSON içerisindeki tırnak işaretleri, kaçış karakterleri (escape) vb. geçerli JSON standartlarına (örn: \", \n, \t) uygun olmalıdır.
+4. Asla kullanıcının girdisini doğrudan kopyalama. Eğer eksik bir komut girilmişse, onu çalışabilir en mantıklı tam komuta dönüştür.
 
 MODLAR VE FORMATLAR:
-A) KOMUT MODU (Kullanıcı bir işlem yaptırmak istiyorsa):
-   Format: {\"command\":\"buraya_komut\"}
-   Örnek: {\"command\":\"ls -l\"}
+A) KOMUT MODU (Kullanıcı bir komut/işlem istiyor):
+   Format: {"command":"eksiksiz_tam_komut"}
+   Örnek: {"command":"find . -name \"*.pdf\""}
    
-B) AÇIKLAMA MODU (Kullanıcı '@?' ile sorduysa veya açıklama istiyorsa):
-   Format: {\"explanation\":\"buraya_aciklama\"}
-   Örnek: {\"explanation\":\"ls komutu dosyaları listeler.\"}
+B) AÇIKLAMA MODU (Kullanıcı açıklama veya yardım istiyor):
+   Format: {"explanation":"detaylı_aciklama_metni"}
+   Örnek: {"explanation":"find komutu dosya aramak için kullanılır. -name parametresi dosya adını eşleştirir."}
 
-TEHLİKELİ KOMUTLAR:
-Tehlikeli veya riskli isteklerde: {\"command\":\"DANGER\", \"explanation\":\"DANGER\"}
+GÜVENLİK VE TEHLİKELİ İSTEKLER:
+Aşağıdaki durumlarda mutlaka {"command":"DANGER"} yanıtı vermelisin:
+- Sistem dosyalarını silmeye veya bozmaya yönelik yıkıcı komutlar (örn: rm -rf /, dd, vb.)
+- Güvenli olmayan yetki yükseltmeleri (örn: sudo su)
+- Fork bombaları (:|:& vb.)
+- Ağdan zararlı betik indirip doğrudan çalıştırma (örn: curl ... | sh)
+- Kimlik bilgilerini (credentials) sızdırmaya yönelik şüpheli aktiviteler
 
-HATIRLA: Sadece istenen modun JSON anahtarını kullan. Tek satır, tek JSON."
+ÇALIŞMA ORTAMI BAĞLAMI:
+Bu komutlar şu anki sistem bağlamında çalıştırılacaktır:
+- İşletim Sistemi: __OS_INFO__ (Buna göre doğru BSD/GNU parametrelerini seç!)
+- Etkin Kabuk (Shell): __SHELL_INFO__
+- Mevcut Çalışma Dizini (PWD): __PWD_INFO__
+- Son Çalıştırılan Komutlar (History):
+__HISTORY_INFO__'
+
+SYSTEM_MESSAGE_EN='You are a highly skilled Linux and macOS terminal expert. You analyze natural language requests and either generate executable terminal commands or explain them.
+
+CRITICAL FORMAT RULES:
+1. Respond ONLY with a valid JSON object. Do not write any conversational intro/outro text (e.g. "Here is your command:", "```json", etc.).
+2. The JSON object must be on a single line with no newlines.
+3. Ensure proper JSON escaping for special characters (e.g., \", \n, \t).
+4. Never copy the user''s input as-is. If an incomplete command is requested, convert it into the most logical, fully functioning command.
+
+RESPONSE MODES AND FORMATS:
+A) COMMAND MODE (User wants a command/action):
+   Format: {"command":"complete_working_command"}
+   Example: {"command":"find . -name \"*.pdf\""}
+   
+B) EXPLANATION MODE (User wants explanation or help):
+   Format: {"explanation":"detailed_explanation_text"}
+   Example: {"explanation":"The find command is used to search for files. The -name parameter matches the filename pattern."}
+
+SECURITY AND DANGEROUS REQUESTS:
+You must respond with {"command":"DANGER"} under the following conditions:
+- Destructive commands aiming to delete or damage system files (e.g., rm -rf /, dd, etc.)
+- Insecure privilege escalations (e.g., sudo su)
+- Fork bombs (:|:& etc.)
+- Downloading and directly executing untrusted scripts (e.g., curl ... | sh)
+- Suspicious activity trying to exfiltrate credentials
+
+ENVIRONMENT CONTEXT:
+The commands will run in the following environment context:
+- Operating System: __OS_INFO__ (Choose correct BSD/GNU flags accordingly!)
+- Active Shell: __SHELL_INFO__
+- Current Directory (PWD): __PWD_INFO__
+- Recent Command History:
+__HISTORY_INFO__'
+
+# Yardımcı Fonksiyonlar ve Dinamik Prompt Yönetimi
+_detect_user_language() {
+    local input="$1"
+    # Türkçe tespiti için karakter/kelime kontrolü
+    if [[ "$input" =~ [çğıöşüÇĞIİÖŞÜ] ]] || \
+       [[ "$input" =~ (dosya|dizin|listele|göster|bul|sil|kopyala|taşı|kurulum|yükle|kaldır|nedir|nasıl|açıkla) ]]; then
+        echo "tr"
+    else
+        echo "en"
+    fi
+}
+
+_get_recent_history() {
+    local hist_lines=""
+    if [[ -f "$HOME/.zsh_history" ]]; then
+        # Son 15 satırı çek, temizle, hassas veya smart-execute komutlarını filtrele
+        hist_lines=$(tail -n 15 "$HOME/.zsh_history" 2>/dev/null | cut -d';' -f2- | grep -vE '(KEY|PASS|TOKEN|SECRET|@|smart-execute)' | tail -n 3)
+    fi
+    if [[ -z "$hist_lines" ]]; then
+        hist_lines="(Terminal geçmişi bulunmuyor veya temiz)"
+    fi
+    echo "$hist_lines"
+}
+
+_extract_json_from_response() {
+    local raw_output="$1"
+    
+    # Doğrudan geçerli JSON ise
+    if echo "$raw_output" | jq -e . >/dev/null 2>&1; then
+        echo "$raw_output"
+        return 0
+    fi
+    
+    # markdown ```json ... ``` ayıkla
+    local json_block
+    json_block=$(echo "$raw_output" | sed -n '/```json/,/```/p' | grep -v '```')
+    if [[ -n "$json_block" ]] && echo "$json_block" | jq -e . >/dev/null 2>&1; then
+        echo "$json_block"
+        return 0
+    fi
+    
+    # markdown ``` ... ``` ayıkla
+    json_block=$(echo "$raw_output" | sed -n '/```/,/```/p' | grep -v '```')
+    if [[ -n "$json_block" ]] && echo "$json_block" | jq -e . >/dev/null 2>&1; then
+        echo "$json_block"
+        return 0
+    fi
+    
+    # regex ile en dıştaki { ... } ayıkla
+    json_block=$(echo "$raw_output" | grep -o '\{.*\}' | tail -n 1)
+    if [[ -n "$json_block" ]] && echo "$json_block" | jq -e . >/dev/null 2>&1; then
+        echo "$json_block"
+        return 0
+    fi
+    
+    echo "$raw_output"
+    return 1
+}
+
+_get_enhanced_prompt() {
+    local user_input="$1"
+    local mode="$2"
+    
+    local lang="$SMART_EXECUTE_LANG"
+    if [[ "$lang" == "auto" || -z "$lang" ]]; then
+        lang=$(_detect_user_language "$user_input")
+    fi
+    
+    local system_tmpl
+    if [[ "$lang" == "tr" ]]; then
+        system_tmpl="$SYSTEM_MESSAGE_TR"
+    else
+        system_tmpl="$SYSTEM_MESSAGE_EN"
+    fi
+    
+    local os_info="macOS (Darwin)"
+    [[ "$(uname -s)" != "Darwin" ]] && os_info="Linux"
+    
+    local shell_info="zsh"
+    local pwd_info="$PWD"
+    local history_info=$(_get_recent_history)
+    
+    # Yer tutucuları güvenle yerleştir
+    local system_msg="$system_tmpl"
+    system_msg="${system_msg/__OS_INFO__/$os_info}"
+    system_msg="${system_msg/__SHELL_INFO__/$shell_info}"
+    system_msg="${system_msg/__PWD_INFO__/$pwd_info}"
+    system_msg="${system_msg/__HISTORY_INFO__/$history_info}"
+    
+    local mode_instruction=""
+    if [[ "$mode" == "explanation" ]]; then
+        if [[ "$lang" == "tr" ]]; then
+            mode_instruction=$'\nKullanıcı bir komutun açıklamasını istiyor. {"explanation": "..."} formatında yanıt ver.'
+        else
+            mode_instruction=$'\nUser wants a command explanation. Respond in {"explanation": "..."} format.'
+        fi
+    else
+        if [[ "$lang" == "tr" ]]; then
+            mode_instruction=$'\nKullanıcı bir komut istiyor. {"command": "..."} formatında yanıt ver.'
+        else
+            mode_instruction=$'\nUser wants a command. Respond in {"command": "..."} format.'
+        fi
+    fi
+    
+    echo "$system_msg$mode_instruction"
+}
+
+# Geriye dönük uyumluluk için varsayılan SYSTEM_MESSAGE tanımı
+SYSTEM_MESSAGE="$SYSTEM_MESSAGE_TR"
 
 
 # Liste yükleme fonksiyonu
@@ -277,11 +449,7 @@ _call_llm() {
     fi
 
     # Prompt hazırlama
-    if [[ "$mode" == "explanation" ]]; then
-        full_prompt="$SYSTEM_MESSAGE\nKullanıcı bir komutun açıklamasını istiyor. Yanıtını {\"explanation\": \"...\"} formatında ver.\nİstek: $user_prompt"
-    else
-        full_prompt="$SYSTEM_MESSAGE\nKullanıcı bir komut istiyor. Yanıtını {\"command\": \"...\"} formatında ver.\nİstek: $user_prompt"
-    fi
+    full_prompt=$(_get_enhanced_prompt "$user_prompt" "$mode")
 
     # Cache kontrolü
     if [[ "$(whence -w _get_cached_response 2>/dev/null)" == *function* ]]; then
@@ -341,19 +509,11 @@ _call_llm() {
             response_field="$response"
         fi
         
-        # İçerik command/explanation içeriyor mu kontrol et
-        # Provider response nested JSON olabilir, önce parse edelim
+        # Gelişmiş JSON Extractor ile JSON'ı ayıkla ve doğrula
         local inner_json=""
-        if echo "$response_field" | jq . >/dev/null 2>&1; then
-            inner_json="$response_field"
-        else
-            # response field içinde nested JSON string olabilir
-            if echo "$response_field" | grep -q '{".*"}'; then
-                inner_json="$response_field"
-            fi
-        fi
+        inner_json=$(_extract_json_from_response "$response_field")
         
-        if [[ -n "$inner_json" ]]; then
+        if [[ $? -eq 0 && -n "$inner_json" ]]; then
             if [[ "$mode" == "explanation" ]]; then
                 local explanation=$(echo "$inner_json" | jq -r '.explanation // empty' 2>/dev/null)
                 if [[ -n "$explanation" && "$explanation" != "null" ]]; then
@@ -429,23 +589,23 @@ smart_accept_line() {
     local user_command
     local mode
 
-    # ── Guard 1: VSCode / Cursor / Windsurf shell integration bypass ──
-    # Bu ortamlar kendi ^M hook'larını kullanır; çakışmayı önleriz.
-    if [[ -n "${VSCODE_SHELL_INTEGRATION:-}" || "${TERM_PROGRAM:-}" == "vscode" ]]; then
-        zle .accept-line
+    # ── Guard 1: AI Agent / Shell Integration bypass ──
+    # AI agent terminallerinde kendi ^M hook'larını kullanmalarına izin veriyoruz.
+    if _smart_is_ai_agent; then
+        zle $_SMART_EXECUTE_ORIG_ACCEPT_LINE
         return
     fi
 
     # Boş komut kontrolü
     if [[ -z "$original_command" ]]; then
-        zle .accept-line
+        zle $_SMART_EXECUTE_ORIG_ACCEPT_LINE
         return
     fi
 
     # Doğrudan çalıştırma (/ prefixi)
     if [[ "$original_command" == /* ]]; then
         BUFFER="${original_command#/}"
-        zle .accept-line
+        zle $_SMART_EXECUTE_ORIG_ACCEPT_LINE
         return
     fi
 
@@ -459,7 +619,7 @@ smart_accept_line() {
     else
         # '@' veya '@?' olmadan girilen komutlar için LLM'e gitme
         BUFFER="$original_command"
-        zle .accept-line
+        zle $_SMART_EXECUTE_ORIG_ACCEPT_LINE
         return
     fi
     # Baş ve sondaki boşlukları sil
@@ -484,7 +644,7 @@ smart_accept_line() {
     # Beyaz liste kontrolü (sadece komut modunda)
     if [[ "$mode" == "command" ]] && _is_whitelisted "$user_command"; then
         BUFFER="$user_command"
-        zle .accept-line
+        zle $_SMART_EXECUTE_ORIG_ACCEPT_LINE
         return
     fi
 
@@ -576,7 +736,7 @@ smart_accept_line() {
     if [[ ! -t 0 ]]; then
         _smart_log "EXECUTE" "Non-TTY auto-execute | Input: $user_command | Command: $suggested_command"
         BUFFER=$suggested_command
-        zle .accept-line
+        zle $_SMART_EXECUTE_ORIG_ACCEPT_LINE
         return
     fi
     
@@ -586,7 +746,7 @@ smart_accept_line() {
     if [[ $REPLY =~ ^[Ee]$ ]]; then
         _smart_log "EXECUTE" "Input: $user_command | Command: $suggested_command"
         BUFFER=$suggested_command
-        zle .accept-line
+        zle $_SMART_EXECUTE_ORIG_ACCEPT_LINE
     elif [[ $REPLY =~ ^[Dd]$ ]]; then
         BUFFER=$suggested_command
         zle redisplay
@@ -781,8 +941,10 @@ done
 
 # İlk kurulum kontrolü
 if [[ ! -f "$SMART_EXECUTE_CONFIG_DIR/.smart_execute_security.conf" && ! -f "$SMART_EXECUTE_CONFIG_DIR/security.conf" ]]; then
-    echo "🚀 Smart Execute v2.0 ilk kez çalışıyor!"
-    echo "Kurulum sihirbazını çalıştırmak için: smart-execute setup"
+    if [[ -o interactive ]] && ! _smart_is_ai_agent; then
+        echo "🚀 Smart Execute v2.0 ilk kez çalışıyor!"
+        echo "Kurulum sihirbazını çalıştırmak için: smart-execute setup"
+    fi
     
     # Temel yapılandırmayı oluştur
     mkdir -p "$SMART_EXECUTE_CONFIG_DIR"
@@ -798,7 +960,18 @@ fi
 
 # Cache temizliği (güvenli)
 if [[ "$(whence -w _cleanup_cache 2>/dev/null)" == *function* ]]; then
-    (_cleanup_cache &)
+    local cache_cleanup_marker="$SMART_EXECUTE_CONFIG_DIR/.cache_cleanup_marker"
+    local run_cleanup=true
+    if [[ -f "$cache_cleanup_marker" ]]; then
+        local marker_time=$(stat -c %Y "$cache_cleanup_marker" 2>/dev/null || stat -f %m "$cache_cleanup_marker" 2>/dev/null)
+        local current_time=$(date +%s)
+        if [[ $((current_time - marker_time)) -lt 86400 ]]; then
+            run_cleanup=false
+        fi
+    fi
+    if [[ "$run_cleanup" == "true" ]]; then
+        (_cleanup_cache && touch "$cache_cleanup_marker" 2>/dev/null &)
+    fi
 else
     # Manuel cache temizliği
     if [[ -d "$SMART_EXECUTE_CONFIG_DIR/cache" ]]; then
@@ -811,18 +984,23 @@ if [[ "$(whence -w setup_cross_shell_support 2>/dev/null)" == *function* ]]; the
     setup_cross_shell_support
 fi
 
-# ── Guard 3: Interactive-only ZLE bağlamaları ──
-# Non-interactive shell'de (CI/CD, script, pipe) ZLE yoktur;
-# yüklemeye çalışmak 'zle: no current binding' hatası üretir.
-if [[ -o interactive ]]; then
+# ── Guard 3: Interactive-only ve Non-AI Agent ZLE bağlamaları ──
+# Non-interactive shell'de veya AI agent terminallerinde ZLE modifikasyonlarını atlıyoruz.
+if [[ -o interactive ]] && ! _smart_is_ai_agent; then
+    # Orijinal widget'ı kaydet (daha önce kaydedilmediyse)
+    if [[ -z "$_SMART_EXECUTE_ORIG_ACCEPT_LINE" ]]; then
+        _SMART_EXECUTE_ORIG_ACCEPT_LINE=$(bindkey -L '^M' 2>/dev/null | awk '{print $NF}')
+        [[ -z "$_SMART_EXECUTE_ORIG_ACCEPT_LINE" || "$_SMART_EXECUTE_ORIG_ACCEPT_LINE" == "smart_accept_line" ]] && _SMART_EXECUTE_ORIG_ACCEPT_LINE=".accept-line"
+    fi
+
     zle -N smart_accept_line
     bindkey '^M' smart_accept_line
     bindkey '^J' smart_accept_line
+    
+    # Başarılı yükleme mesajı (sadece gerçek interaktif terminallerde)
+    echo "✅ Smart Execute v2.0 yüklendi!"
+    echo "📚 Yardım için: smart-execute help"
+    echo "⚙️  Kurulum için: smart-execute setup"
 fi
 
-# Başarılı yükleme mesajı
 _smart_log "SYSTEM" "Smart Execute v2.0 loaded successfully"
-
-echo "✅ Smart Execute v2.0 yüklendi!"
-echo "📚 Yardım için: smart-execute help"
-echo "⚙️  Kurulum için: smart-execute setup"
