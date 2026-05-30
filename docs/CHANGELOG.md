@@ -1,5 +1,30 @@
 # Changelog - Smart Execute v2.0
 
+## v2.0.2 - Gelişmiş Dinamik Prompt ve Çevre Bağlamı Entegrasyonu (2026-05-30)
+
+### ✅ Durum: ÜRETİM İÇİN HAZIR (STABLE)
+Bu ara sürüm, sistem mesajlarının kalitesini artırıp çalıştırılan platforma ve dizine özel en uygun komutların önerilmesini sağlar.
+
+### 🚀 Yeni Özellikler ve İyileştirmeler
+
+#### Dinamik Dil Yönetimi (`SMART_EXECUTE_LANG`)
+* `SMART_EXECUTE_LANG` konfigürasyon parametresi (`auto`, `tr`, `en`) eklendi.
+* Türkçe ve İngilizce sorgular için en üst düzey kalitede dinamik prompt şablonları (`SYSTEM_MESSAGE_TR` ve `SYSTEM_MESSAGE_EN`) geliştirildi.
+* Otomatik dil tespit sistemi (`_detect_user_language`) entegre edildi.
+
+#### Çevre Bağlamı Entegrasyonu (Context Collector)
+* **OS Tespiti:** macOS (Darwin) ve Linux sistemler otomatik algılanıp LLM'e iletilir. Böylece BSD ve GNU komut parametresi uyumluluğu sağlanır.
+* Kabuk türü (`zsh`) ve mevcut aktif dizin (`$PWD`) bilgileri dinamik olarak prompt'a enjekte edilir.
+* **Güvenli Geçmiş Analizi:** Terminal geçmişinden (`history`) son 3 geçerli komut çekilirken şifreler, API anahtarları veya smart-execute tetiklemeleri otomatik olarak sansürlenir.
+
+#### Çoklu Sağlayıcı Entegrasyonu
+* Gemini, Ollama ve diğer sağlayıcı çağrıları tek bir merkezi prompt üretecine (`_get_enhanced_prompt`) bağlanarak tutarlılık sağlandı.
+
+#### Hata Toleranslı JSON Extractor
+* Modellerden gelen ham metinler arasından JSON yapısını (`{...}`) ayıklayan regex/sed tabanlı esnek parser (`_extract_json_from_response`) entegre edildi, JSON parse hataları giderildi.
+
+---
+
 ## v2.0.1 - Stable Release (2025-08-07)
 
 ### ✅ Durum: TAM İŞLEVSEL

@@ -24,6 +24,10 @@
 - Global variables: Use `typeset -g` for global scope
 - Error handling: Use `set -e` in install scripts, check command existence with `command -v`
 - Logging: Use `_smart_log()` function for consistent logging format
+- Prompt generation: Use `_get_enhanced_prompt()` to dynamically compile system messages with dynamic environment context
+- Language detection: Use `_detect_user_language()` to identify user input language
+- History context: Use `_get_recent_history()` to fetch sanitized recent terminal command history
+- JSON Extraction: Use `_extract_json_from_response()` to isolate JSON blocks from conversational model responses
 
 ### Security Patterns
 
@@ -59,3 +63,4 @@
 - Use environment variables for overrides (`SMART_EXECUTE_CONFIG_DIR`)
 - Security settings in `security.conf`
 - Blacklist patterns in `blacklist.txt`
+- Language preferences in `SMART_EXECUTE_LANG` (options: `auto`, `tr`, `en`)
