@@ -331,13 +331,27 @@ SYSTEM_MESSAGE="$SYSTEM_MESSAGE_TR"
 
 # Liste yükleme fonksiyonu
 _smart_load_lists() {
-    # Kara Liste kontrolünü devre dışı bırak - case-based kontrol kullanıyoruz
     BLACKLIST_PATTERNS=()
     
-    # Testlerin geçmesi için dosyanın var olduğundan emin ol
-    if [[ ! -f "$BLACKLIST_FILE" ]]; then
+    # Kara liste dosyasını kontrol et ve gerekirse şablondan kopyala
+    if [[ ! -f "$BLACKLIST_FILE" || ! -s "$BLACKLIST_FILE" ]]; then
         mkdir -p "$SMART_EXECUTE_CONFIG_DIR"
-        touch "$BLACKLIST_FILE"
+        if [[ -f "$SMART_EXECUTE_DIR/../../config/blacklist.txt" ]]; then
+            cp "$SMART_EXECUTE_DIR/../../config/blacklist.txt" "$BLACKLIST_FILE"
+        elif [[ -f "$SMART_EXECUTE_DIR/../config/blacklist.txt" ]]; then
+            cp "$SMART_EXECUTE_DIR/../config/blacklist.txt" "$BLACKLIST_FILE"
+        elif [[ -f "$SMART_EXECUTE_DIR/config/blacklist.txt" ]]; then
+            cp "$SMART_EXECUTE_DIR/config/blacklist.txt" "$BLACKLIST_FILE"
+        else
+            touch "$BLACKLIST_FILE"
+        fi
+    fi
+    
+    # Kara Liste kalıplarını güvenle yükle
+    if [[ -f "$BLACKLIST_FILE" ]]; then
+        while IFS= read -r line; do
+            [[ -n "$line" && "$line" != \#* ]] && BLACKLIST_PATTERNS+=("$line")
+        done < "$BLACKLIST_FILE"
     fi
     
     # Beyaz Liste
@@ -392,10 +406,13 @@ EOF
 
 # Kara liste kontrolü
 _is_blacklisted() {
-    # Basit string kontrolü - regex problemlerini önlemek için
+    # Zsh local scope ve PCRE desteğini aktifleştir
+    emulate -L zsh
+    setopt RE_MATCH_PCRE
+    
     local input="$1"
     
-    # Kritik tehlikeli komutları direkt kontrol et
+    # 1. Hızlı ve kritik case-based kontroller
     case "$input" in
         "rm -rf /"*) return 0 ;;
         "shutdown"*) return 0 ;;
@@ -404,8 +421,20 @@ _is_blacklisted() {
         "poweroff"*) return 0 ;;
         *"rm -rf"*) return 0 ;;
         *"dd if="*"of=/dev/"*) return 0 ;;
-        *) return 1 ;;
     esac
+    
+    # 2. Gelişmiş regex kara liste kontrolleri (eğer yüklendiyse)
+    if [[ ${#BLACKLIST_PATTERNS[@]} -gt 0 ]]; then
+        for pattern in "${BLACKLIST_PATTERNS[@]}"; do
+            # Regex uyumunu zsh pcre =~ operatörüyle güvenle ve hızlıca kontrol et
+            if [[ "$input" =~ $pattern ]]; then
+                _smart_log "BLACKLIST_REGEX_MATCH" "Input: '$input' | Pattern: '$pattern'"
+                return 0
+            fi
+        done
+    fi
+    
+    return 1
 }
 
 # Beyaz liste kontrolü
