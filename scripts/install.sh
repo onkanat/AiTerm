@@ -106,6 +106,12 @@ mkdir -p "$INSTALL_DIR"
 if [[ -f "$PROJECT_ROOT/src/core/smart_execute_v2.zsh" ]]; then
     cp "$PROJECT_ROOT/src/core/smart_execute_v2.zsh" "$INSTALL_DIR/"
     echo -e "${GREEN}✓${NC} Ana dosya kopyalandı"
+    
+    # aiterm CLI aracını bin dizinine kopyala ve çalıştırılabilir yap
+    mkdir -p "$INSTALL_DIR/bin"
+    cp "$PROJECT_ROOT/src/core/aiterm" "$INSTALL_DIR/bin/"
+    chmod +x "$INSTALL_DIR/bin/aiterm"
+    echo -e "${GREEN}✓${NC} aiterm CLI kopyalandı"
 else
     echo -e "${RED}❌ $PROJECT_ROOT/src/core/smart_execute_v2.zsh bulunamadı${NC}"
     exit 1
@@ -134,12 +140,19 @@ echo ""
 echo "Shell konfigürasyonu güncelleniyor..."
 
 SOURCE_LINE="source $INSTALL_DIR/smart_execute_v2.zsh"
+PATH_LINE="export PATH=\"\$PATH:$INSTALL_DIR/bin\""
 
 if grep -q "smart_execute" "$SHELL_RC" 2>/dev/null; then
     echo -e "${YELLOW}⚠️  Smart Execute zaten $SHELL_RC dosyasında mevcut${NC}"
+    # PATH eklenmiş mi kontrol et, eklenmediyse ekle
+    if ! grep -q "smart_execute/bin" "$SHELL_RC" 2>/dev/null; then
+        echo "$PATH_LINE" >> "$SHELL_RC"
+        echo -e "${GREEN}✓${NC} PATH tanımı $SHELL_RC dosyasına eklendi"
+    fi
 else
     echo "" >> "$SHELL_RC"
     echo "# Smart Execute v2.0" >> "$SHELL_RC"
+    echo "$PATH_LINE" >> "$SHELL_RC"
     echo "$SOURCE_LINE" >> "$SHELL_RC"
     echo -e "${GREEN}✓${NC} $SHELL_RC güncellendi"
 fi
@@ -158,12 +171,12 @@ echo "1. Terminali yeniden başlatın veya şunu çalıştırın:"
 echo "   ${BLUE}source $SHELL_RC${NC}"
 echo ""
 echo "2. Kurulum sihirbazını çalıştırın:"
-echo "   ${BLUE}smart-execute setup${NC}"
+echo "   ${BLUE}aiterm setup${NC}"
 echo ""
 echo "3. Kullanım örnekleri:"
-echo "   ${BLUE}@ masaüstündeki txt dosyalarını listele${NC}"
-echo "   ${BLUE}@? ls -la${NC}"
-echo "   ${BLUE}/ls${NC}"
+echo "   ${BLUE}aiterm ask \"masaüstündeki txt dosyalarını listele\"${NC}"
+echo "   ${BLUE}aiterm explain \"ls -la\"${NC}"
+echo "   ${BLUE}aiterm run \"npm install\"${NC}"
 echo ""
 
 # Ollama kontrolü

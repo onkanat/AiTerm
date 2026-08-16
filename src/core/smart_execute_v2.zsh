@@ -128,6 +128,14 @@ LLM_PROVIDER="ollama"
 FALLBACK_PROVIDER="ollama"
 SMART_EXECUTE_LANG="auto"
 
+# Agent Context Protection defaults
+AITERM_MAX_LINES=200
+AITERM_MAX_BYTES=10000
+AITERM_STRIP_ANSI=true
+AITERM_AUTO_SUMMARY=false
+AITERM_AUTO_WRAP=false
+AITERM_ERROR_KEYWORDS="error|exception|failed|fatal|warning|critical|unhandled|error:"
+
 # Güvenlik ayarları
 SECURITY_LEVEL=2
 MAX_COMMAND_LENGTH=1000
@@ -951,6 +959,8 @@ smart_execute_command() {
 
 # Alias tanımla
 alias smart-execute='smart_execute_command'
+alias aiterm='smart_execute_command'
+alias se='smart_execute_command'
 
 # =================== BAŞLATMA VE KURULUM =====================
 

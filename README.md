@@ -182,6 +182,37 @@ Normalde Zsh'e komut girer gibi komutlarınızı yazın. Ek olarak, Smart Execut
 /pwd
 ```
 
+### 🤖 AI Agent ve CLI Kullanımı (`aiterm`)
+
+Interactive shell veya Zsh ZLE widget'larını kullanamayan **AI Agent'lar** ve **otomasyon senaryoları** için `aiterm` (veya `se` kısayolu) komut satırı aracı geliştirilmiştir.
+
+`aiterm` CLI aracı, agent'ların terminal kullanımlarındaki çıktılarını optimize eder, ANSI renk ve kontrol karakterlerini ayıklar ve çıktıları akıllıca kırparak **yoğun context tüketimini ve API maliyetlerini engeller.**
+
+#### Komut Yapısı:
+```bash
+aiterm <subcommand> [options] [arguments]
+```
+
+#### CLI Komutları:
+1. **`aiterm run [options] "<command>"`**: Belirtilen terminal komutunu çalıştırır ve çıktısını agent dostu bir biçime getirir.
+   - `-l, --max-lines <n>`: Maksimum satır sayısı (Varsayılan: `200`).
+   - `-b, --max-bytes <n>`: Maksimum byte sınırı (Varsayılan: `10000`).
+   - `-f, --format <raw|markdown|json>`: Çıktı formatı (Varsayılan: `markdown`).
+   - `-s, --summary`: Komut çıktısını LLM kullanarak özetler.
+   - `-n, --no-strip`: ANSI renk kodlarının temizlenmesini kapatır.
+2. **`aiterm run "npm install"`**: Örnek wrapper kullanımı.
+3. **`aiterm ask "<prompt>"`** (veya `aiterm "<prompt>"`): Doğal dil ile komut önerisi ister.
+4. **`aiterm explain "<command>"`**: Belirtilen komutun ne işe yaradığını açıklar.
+5. **`aiterm status` / `setup` / `logs` / `audit`**: Yapılandırma ve yönetim araçları.
+
+#### Akıllı Çıktı Kırpma (Context Saving):
+Eğer bir komutun çıktısı limitleri aşarsa, `aiterm run` çıktıyı ortasından kırpar. Ancak kırpılan kısımda hata (`Error`, `Exception`, `Failed` vb.) olup olmadığını kontrol eder. Eğer hata satırları bulunursa bunları özel bir başlık altında (`⚠️ Omitted Output Error Highlights:`) koruyarak çıktıya ekler. Böylece agent hem çıktının başlangıç/bitiş bağlamını görür hem de hata detayını kaçırmaz.
+
+#### Otomatik Sarma (Auto-Wrap):
+`AITERM_AUTO_WRAP=true` çevre değişkeni tanımlandığında, yüksek çıktı üreten komutlar (`npm`, `cargo`, `pip`, `git`, `make` vb.) otomatik olarak `aiterm run` filtresinden geçirilerek çalıştırılır. `git status`, `pwd`, `ls` gibi doğrudan parse edilmesi gereken bilgi komutları ise bypass listesi ile ham olarak çalıştırılmaya devam edilir.
+
+---
+
 Diğer tüm komutlar normal şekilde çalıştırılır. LLM'e göndermek için `@` veya `@?` öneklerini kullanın.
 
 ## Güvenlik Tedbirleri

@@ -1,0 +1,334 @@
+#!/bin/zsh
+# =============================================================================
+#                    AITERM - AGENT TERMINAL COMMAND WRAPPER & CLI
+# =============================================================================
+
+# Load config and modules
+# Sourcing smart_execute_v2.zsh sets up our environment, config loading, and provider logic.
+AITERM_DIR="$(dirname "${(%):-%x}")"
+if [[ -f "$AITERM_DIR/smart_execute_v2.zsh" ]]; then
+    source "$AITERM_DIR/smart_execute_v2.zsh" >/dev/null 2>&1
+elif [[ -f "$HOME/.smart_execute/smart_execute_v2.zsh" ]]; then
+    source "$HOME/.smart_execute/smart_execute_v2.zsh" >/dev/null 2>&1
+fi
+
+_aiterm_usage() {
+    echo "AiTerm - AI Agent Terminal Wrapper & Helper v2.0"
+    echo "Usage: aiterm <command> [options] [args]"
+    echo ""
+    echo "Commands:"
+    echo "  run [options] \"<command>\"  - Run a shell command and optimize output for agent context"
+    echo "  ask \"<prompt>\"           - Ask the LLM to suggest a terminal command"
+    echo "  explain \"<command>\"       - Ask the LLM to explain a command"
+    echo "  setup                    - Run the configuration wizard"
+    echo "  status                   - Show current status and config"
+    echo "  logs                     - Show recent activity logs"
+    echo "  audit                    - Show audit logs"
+    echo "  cache-stats              - Show cache statistics"
+    echo "  cache-clear              - Clear cache entries"
+    echo ""
+    echo "Options for 'run':"
+    echo "  -l, --max-lines <n>     - Maximum lines to output (default: AITERM_MAX_LINES)"
+    echo "  -b, --max-bytes <n>     - Maximum bytes to output (default: AITERM_MAX_BYTES)"
+    echo "  -f, --format <fmt>      - Output format: raw, markdown, json (default: markdown)"
+    echo "  -s, --summary           - Request an LLM summary of the command execution"
+    echo "  -n, --no-strip          - Do not strip ANSI colors/cursor movements"
+    echo ""
+    echo "Example:"
+    echo "  aiterm run \"npm install\""
+    echo "  aiterm ask \"find all package.json files\""
+}
+
+_aiterm_clean_file() {
+    local src="$1"
+    local dst="$2"
+    local strip_ansi="$3"
+    
+    if [[ ! -s "$src" ]]; then
+        touch "$dst"
+        return
+    fi
+    
+    # Strip ANSI and clean carriage returns (\r)
+    # Using awk for universal compatibility across Linux and macOS.
+    if [[ "$strip_ansi" == "true" ]]; then
+        awk '
+        {
+            # Strip ANSI escape sequences
+            gsub(/\x1B\[[0-9;]*[a-zA-Z]/, "")
+            
+            # Clean carriage returns: split by \r, print only last segment
+            if (gsub(/\r/, "\n")) {
+                n = split($0, arr, "\n")
+                printed = 0
+                for (i = n; i >= 1; i--) {
+                    if (arr[i] != "") {
+                        print arr[i]
+                        printed = 1
+                        break
+                    }
+                }
+                if (!printed) print ""
+            } else {
+                print $0
+            }
+        }
+        ' "$src" > "$dst"
+    else
+        awk '
+        {
+            if (gsub(/\r/, "\n")) {
+                n = split($0, arr, "\n")
+                printed = 0
+                for (i = n; i >= 1; i--) {
+                    if (arr[i] != "") {
+                        print arr[i]
+                        printed = 1
+                        break
+                    }
+                }
+                if (!printed) print ""
+            } else {
+                print $0
+            }
+        }
+        ' "$src" > "$dst"
+    fi
+}
+
+_aiterm_generate_llm_summary() {
+    local cmd="$1"
+    local stdout="$2"
+    local stderr="$3"
+    local exit_code="$4"
+    
+    local summary_prompt="Sistemde çalışan bir komutun çıktısını özetle.
+Komut: $cmd
+Çıkış Kodu (Exit Code): $exit_code
+
+Çıktı (Stdout):
+$stdout
+
+Hata Çıktısı (Stderr):
+$stderr
+
+Görev: Çıktıyı 1-2 cümle ile özetle. Eğer hata varsa, hatanın ne olduğunu ve nasıl çözülebileceğini belirt. Yanıtın son derece kısa, net ve doğrudan olsun."
+
+    local summary
+    summary=$(_call_llm "$summary_prompt" "explanation")
+    echo "$summary"
+}
+
+_aiterm_should_bypass() {
+    local cmd="$1"
+    # Remove leading/trailing spaces
+    cmd=$(echo "$cmd" | sed 's/^ *//;s/ *$//')
+    
+    # If the command is a compound command or pipeline, do not bypass
+    if [[ "$cmd" =~ '[;&|]' ]]; then
+        return 1
+    fi
+    
+    local bypass_list=("git status" "git diff" "pwd" "cd" "ls" "echo" "cat" "clear" "history" "jq" "which" "whereis" "printenv" "env" "exit")
+    for bp in "${bypass_list[@]}"; do
+        if [[ "$cmd" == "$bp"* || "$cmd" == "$bp" ]]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+_aiterm_run_command_logic() {
+    local cmd="$1"
+    local max_lines="$2"
+    local max_bytes="$3"
+    local format="$4"
+    local summary_flag="$5"
+    local strip_ansi="$6"
+    
+    # Check bypass
+    if _aiterm_should_bypass "$cmd"; then
+        eval "$cmd"
+        exit $?
+    fi
+    
+    local stdout_file=$(mktemp)
+    local stderr_file=$(mktemp)
+    
+    zmodload zsh/datetime 2>/dev/null
+    local start_time=$EPOCHREALTIME
+    
+    # Run the command
+    eval "$cmd" >"$stdout_file" 2>"$stderr_file"
+    local exit_code=$?
+    
+    local end_time=$EPOCHREALTIME
+    local elapsed_ms=0
+    if [[ -n "$start_time" && -n "$end_time" ]]; then
+        local diff=$(( (end_time - start_time) * 1000 ))
+        elapsed_ms=${diff%.*}
+    fi
+    
+    # Clean the outputs
+    local clean_stdout="${stdout_file}.clean"
+    local clean_stderr="${stderr_file}.clean"
+    
+    _aiterm_clean_file "$stdout_file" "$clean_stdout" "$strip_ansi"
+    _aiterm_clean_file "$stderr_file" "$clean_stderr" "$strip_ansi"
+    
+    local total_stdout_lines=$(wc -l < "$clean_stdout" | tr -d ' ')
+    local total_stdout_bytes=$(wc -c < "$clean_stdout" | tr -d ' ')
+    local total_stderr_lines=$(wc -l < "$clean_stderr" | tr -d ' ')
+    local total_stderr_bytes=$(wc -c < "$clean_stderr" | tr -d ' ')
+    
+    local is_stdout_truncated=false
+    local stdout_content=""
+    
+    if [[ $total_stdout_lines -gt $max_lines || $total_stdout_bytes -gt $max_bytes ]]; then
+        is_stdout_truncated=true
+        local half_lines=$((max_lines / 2))
+        local head_part=$(head -n $half_lines "$clean_stdout")
+        local tail_part=$(tail -n $half_lines "$clean_stdout")
+        
+        local omitted_lines=$((total_stdout_lines - max_lines))
+        local error_highlights=""
+        if [[ $omitted_lines -gt 0 ]]; then
+            error_highlights=$(sed -n "$((half_lines + 1)),$((total_stdout_lines - half_lines))p" "$clean_stdout" | \
+                grep -iE "${AITERM_ERROR_KEYWORDS:-error|exception|failed|fatal|warning|critical|unhandled|error:}" | \
+                head -n 15)
+        fi
+        
+        stdout_content="$head_part"
+        stdout_content+=$'\n'"[... $omitted_lines lines ($((total_stdout_bytes / 1024)) KB) omitted by AiTerm to save context ...]"
+        if [[ -n "$error_highlights" ]]; then
+            stdout_content+=$'\n'"⚠️  Omitted Output Error Highlights:"
+            stdout_content+=$'\n'"$error_highlights"
+        fi
+        stdout_content+=$'\n'"$tail_part"
+    else
+        stdout_content=$(cat "$clean_stdout")
+    fi
+    
+    local stderr_content=""
+    if [[ -s "$clean_stderr" ]]; then
+        if [[ $total_stderr_lines -gt 50 ]]; then
+            stderr_content=$(head -n 25 "$clean_stderr")
+            stderr_content+=$'\n'"[... $((total_stderr_lines - 50)) lines omitted by AiTerm ...]"
+            stderr_content+=$'\n'$(tail -n 25 "$clean_stderr")
+        else
+            stderr_content=$(cat "$clean_stderr")
+        fi
+    fi
+    
+    # Generate summary if requested
+    local summary=""
+    if [[ "$summary_flag" == "true" || "$AITERM_AUTO_SUMMARY" == "true" ]]; then
+        summary=$(_aiterm_generate_llm_summary "$cmd" "$stdout_content" "$stderr_content" "$exit_code")
+    fi
+    
+    # Formatting
+    if [[ "$format" == "json" ]]; then
+        jq -n \
+           --arg cmd "$cmd" \
+           --arg exit_code "$exit_code" \
+           --arg elapsed "$elapsed_ms" \
+           --arg stdout "$stdout_content" \
+           --arg stderr "$stderr_content" \
+           --arg summary "$summary" \
+           --argbool truncated "$is_stdout_truncated" \
+           '{command: $cmd, exit_code: ($exit_code|tonumber), elapsed_ms: ($elapsed|tonumber), stdout: $stdout, stderr: $stderr, is_truncated: $truncated, summary: $summary}'
+    elif [[ "$format" == "markdown" ]]; then
+        echo "### 💻 Command Execution: \`$cmd\`"
+        echo "- **Status**: $( [[ $exit_code -eq 0 ]] && echo "🟢 Success" || echo "🔴 Failed (Exit Code: $exit_code)" )"
+        echo "- **Duration**: ${elapsed_ms}ms"
+        [[ -n "$summary" ]] && echo "- **Summary**: $summary"
+        echo ""
+        if [[ -n "$stdout_content" ]]; then
+            echo "#### 📄 Output"
+            echo "\`\`\`stdout"
+            echo "$stdout_content"
+            echo "\`\`\`"
+            echo ""
+        fi
+        if [[ -n "$stderr_content" ]]; then
+            echo "#### ⚠️ Error Output (stderr)"
+            echo "\`\`\`stderr"
+            echo "$stderr_content"
+            echo "\`\`\`"
+            echo ""
+        fi
+    else
+        # raw format
+        if [[ -n "$stdout_content" ]]; then
+            echo "$stdout_content"
+        fi
+        if [[ -n "$stderr_content" ]]; then
+            echo "$stderr_content" >&2
+        fi
+    fi
+    
+    # Cleanup temp files
+    rm -f "$stdout_file" "$stderr_file" "${stdout_file}.clean" "${stderr_file}.clean"
+    
+    exit $exit_code
+}
+
+# Subcommands routing
+local subcommand="$1"
+if [[ -n "$subcommand" ]]; then
+    shift
+fi
+
+case "$subcommand" in
+    "run"|"exec")
+        local max_lines="${AITERM_MAX_LINES:-200}"
+        local max_bytes="${AITERM_MAX_BYTES:-10000}"
+        local format="markdown"
+        local summary_flag="false"
+        local strip_ansi="${AITERM_STRIP_ANSI:-true}"
+        
+        while [[ $# -gt 0 ]]; do
+            case "$1" in
+                -l|--max-lines) max_lines="$2"; shift 2 ;;
+                -b|--max-bytes) max_bytes="$2"; shift 2 ;;
+                -f|--format) format="$2"; shift 2 ;;
+                -s|--summary) summary_flag="true"; shift 1 ;;
+                -n|--no-strip) strip_ansi="false"; shift 1 ;;
+                *) break ;;
+            esac
+        done
+        
+        local cmd_to_run="$*"
+        if [[ -z "$cmd_to_run" ]]; then
+            echo "Error: No command specified to run." >&2
+            exit 1
+        fi
+        _aiterm_run_command_logic "$cmd_to_run" "$max_lines" "$max_bytes" "$format" "$summary_flag" "$strip_ansi"
+        ;;
+    "ask"|"suggest")
+        local prompt="$*"
+        [[ -z "$prompt" ]] && { echo "Error: No prompt specified." >&2; exit 1; }
+        _call_llm "$prompt" "command"
+        ;;
+    "explain")
+        local cmd="$*"
+        [[ -z "$cmd" ]] && { echo "Error: No command specified to explain." >&2; exit 1; }
+        _call_llm "$cmd" "explanation"
+        ;;
+    "setup"|"status"|"logs"|"audit"|"cache-stats"|"cache-clear")
+        smart_execute_command "$subcommand"
+        ;;
+    "help"|"-h"|"--help")
+        _aiterm_usage
+        ;;
+    *)
+        # Default behavior: if first argument is not a subcommand, check if it's non-empty
+        # and treat it as a natural language query for "ask".
+        if [[ -n "$subcommand" ]]; then
+            local full_prompt="$subcommand $*"
+            _call_llm "$full_prompt" "command"
+        else
+            _aiterm_usage
+        fi
+        ;;
+esac

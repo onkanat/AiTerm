@@ -95,8 +95,10 @@ run_tests() {
     echo "----------------------"
     
     # Test ortamı için geçici değişkenler
-    export SMART_EXECUTE_CONFIG_DIR="/tmp/smart_execute_test"
+    export SMART_EXECUTE_CONFIG_DIR="$(pwd)/test_tmp"
     mkdir -p "$SMART_EXECUTE_CONFIG_DIR"
+    mkdir -p "$SMART_EXECUTE_CONFIG_DIR/zsh_tmp"
+    export TMPPREFIX="$SMART_EXECUTE_CONFIG_DIR/zsh_tmp/zsh"
     
     # Ana dosyayı yükle
     if [[ -f "src/core/smart_execute_v2.zsh" ]]; then
@@ -199,6 +201,28 @@ run_tests() {
     
     echo ""
     
+    # AiTerm CLI Tests
+    echo "🤖 AiTerm CLI Tests"
+    echo "-----------------"
+    
+    # Mock test files for cleaning & truncation
+    local test_out="$(pwd)/test_tmp/sample_output"
+    echo -e "Line 1\nLine 2\nProgress bar \rOverwritten line\nLine 5\nAn Error occurred here\nLine 7\nLine 8" > "$test_out"
+    
+    # Verify clean carriage return logic
+    test_assert "Carriage returns cleaned" "source src/core/aiterm; _aiterm_clean_file '$test_out' '${test_out}.clean' 'false'; cat '${test_out}.clean' | grep -q 'Progress bar' && echo 'failed' || echo 'passed'" "passed"
+    
+    # Verify ANSI escape sequence removal
+    local color_out="$(pwd)/test_tmp/color_output"
+    echo -e "\e[31mRed text\e[0m and \e[32mGreen text\e[0m" > "$color_out"
+    test_assert "ANSI escape codes stripped" "source src/core/aiterm; _aiterm_clean_file '$color_out' '${color_out}.clean' 'true'; cat '${color_out}.clean'" "Red text and Green text"
+
+    # Verify should_bypass command classification
+    test_assert "Bypasses git status" "source src/core/aiterm; _aiterm_should_bypass 'git status' && echo 'bypass' || echo 'run'" "bypass"
+    test_assert "Runs npm install" "source src/core/aiterm; _aiterm_should_bypass 'npm install' && echo 'bypass' || echo 'run'" "run"
+    
+    echo ""
+    
     # Sonuçları göster
     echo "📊 Test Results"
     echo "==============="
@@ -215,7 +239,7 @@ run_tests() {
     fi
     
     # Test ortamını temizle
-    rm -rf "/tmp/smart_execute_test"
+    rm -rf "$(pwd)/test_tmp"
     
     echo ""
     echo "Test completed."

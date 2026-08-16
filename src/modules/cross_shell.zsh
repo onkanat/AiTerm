@@ -270,3 +270,31 @@ setup_cross_shell_support() {
             ;;
     esac
 }
+
+# Agent Auto-Wrap feature
+setup_agent_auto_wrap() {
+    if [[ "$AITERM_AUTO_WRAP" == "true" ]]; then
+        # Define wrapper aliases for common high-output commands
+        alias npm='aiterm run npm'
+        alias cargo='aiterm run cargo'
+        alias pip='aiterm run pip'
+        alias pip3='aiterm run pip3'
+        alias git='aiterm run git'
+        alias make='aiterm run make'
+        alias cmake='aiterm run cmake'
+        alias gradle='aiterm run gradle'
+        alias mvn='aiterm run mvn'
+        alias pytest='aiterm run pytest'
+        alias go='aiterm run go'
+        alias bundle='aiterm run bundle'
+        alias yarn='aiterm run yarn'
+        
+        # Log to audit if function exists
+        if [[ "$(whence -w _smart_log 2>/dev/null)" == *function* ]]; then
+            _smart_log "SYSTEM" "AiTerm Auto-Wrap enabled: high-output aliases registered"
+        fi
+    fi
+}
+
+# Run unconditionally to catch agent contexts
+setup_agent_auto_wrap

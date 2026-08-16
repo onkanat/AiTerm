@@ -137,6 +137,14 @@ _detect_anomalies() {
 
 # Session timeout kontrolü
 _check_session_timeout() {
+    # AI agent veya TTY değilse zaman aşımını kontrol etme
+    if [[ "$(whence -w _smart_is_ai_agent 2>/dev/null)" == *function* ]] && _smart_is_ai_agent; then
+        return 0
+    fi
+    if [[ ! -t 0 ]]; then
+        return 0
+    fi
+
     local session_file="$SMART_EXECUTE_CONFIG_DIR/.session"
     local current_time=$(date +%s)
     
@@ -162,6 +170,16 @@ _check_session_timeout() {
 _confirm_execution() {
     local command="$1"
     local risk_score=$(_assess_risk "$command")
+    
+    # AI agent veya TTY değilse onayı atla (audit log'a kaydet ve devam et)
+    if [[ "$(whence -w _smart_is_ai_agent 2>/dev/null)" == *function* ]] && _smart_is_ai_agent; then
+        _audit_log "SECURITY" "AGENT_CONFIRM_BYPASS" "Risk: $risk_score, Command: $command"
+        return 0
+    fi
+    if [[ ! -t 0 ]]; then
+        _audit_log "SECURITY" "NON_TTY_CONFIRM_BYPASS" "Risk: $risk_score, Command: $command"
+        return 0
+    fi
     
     if [[ $risk_score -gt $MAX_RISK_SCORE ]]; then
         echo -e "\n🚨 YÜKSEK RİSK KOMUTU TESPİT EDİLDİ!"

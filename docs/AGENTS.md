@@ -13,7 +13,8 @@
 ### Installation
 
 - **Install**: `./install.sh`
-- **Manual setup**: Source `smart_execute_v2.zsh` in shell rc file
+- **Manual setup**: Source `smart_execute_v2.zsh` in shell rc file, and append `$HOME/.smart_execute/bin` to your `PATH` environment variable.
+- **Verification**: Run `aiterm status` or `se help` to verify the CLI wrapper is successfully linked.
 
 ## Code Style Guidelines
 
