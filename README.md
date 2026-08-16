@@ -39,8 +39,9 @@ Smart Execute, çoklu shell desteği olan gelişmiş bir akıllı komut yorumlay
 
 ### 🤖 Çoklu LLM Desteği
 
+- **Foolproof JSON Parsing:** LLM'lerden gelen kesik (truncated), eksik veya bozuk JSON yanıtlarını regex tabanlı Perl scripti ile mükemmel şekilde ayrıştırır. "Reasoning" modellerin (örn. qwen3.5:2b) kendi iç düşünme ("thinking") bloklarına gömdüğü JSON nesnelerini bile bulup çıkarır, bu sayede en karmaşık modellerle bile sorunsuz çalışır.
 - **Google Gemini (Yeni!):** Google One Pro aboneliği ile **Gemini 3.1 Pro Preview** desteği. En güçlü "Complex" provider.
-- **Ollama:** Yerel, ücretsiz LLM desteği (Local ve Remote/Network desteği).
+- **Ollama:** Yerel, ücretsiz LLM desteği (Local ve Remote/Network desteği). Özel Reasoning modelleri (`qwen3.5:2b` vb.) için geliştirilmiş uyumluluk.
 - **OpenAI:** GPT-3.5/GPT-4 API entegrasyonu.
 - **Anthropic:** Claude API desteği.
 - **Akıllı Provider Seçimi:** Sorgu karmaşıklığına göre otomatik provider seçimi. Basit işler için Ollama, karmaşık işler için Gemini kullanılır.
@@ -76,6 +77,8 @@ Smart Execute, çoklu shell desteği olan gelişmiş bir akıllı komut yorumlay
 - **Gelişmiş İndikatör Desteği:**
   - `@istek`: Standart modda doğal dil isteği gönderir (Basit işlerde Ollama, karmaşık işlerde Gemini kullanılır).
   - `@?istek`: Bir komutun ne işe yaradığına dair LLM'den açıklama ister
+  - `@@istek`: Chat modunda doğal dil isteği gönderir (LLM ile doğrudan sohbet eder).
+  - `komut | @@istek`: Komutun çıktısını LLM'e göndererek üzerine sohbet etmenizi sağlar (Örn: `ls -la | @@ bu dosyalar ne işe yarıyor?`).
   - `/komut`: Komutu LLM'e göndermeden doğrudan çalıştırır
 
 ## Kurulum

@@ -30,6 +30,20 @@
           "response_time": "medium",
           "accuracy": "very_high"
         },
+        "reasoning": {
+          "model": "qwen3.5:2b",
+          "parameters": {
+            "temperature": 0.2,
+            "top_p": 0.85,
+            "repeat_penalty": 1.1,
+            "num_ctx": 4096,
+            "stop": ["\\n", "```", "```json"]
+          },
+          "use_case": "Reasoning models, thinking embedded JSON",
+          "memory_requirement": "4GB",
+          "response_time": "fast",
+          "accuracy": "very_high"
+        },
         "security_focused": {
           "model": "gemma2:9b-instruct-q4_0",
           "parameters": {

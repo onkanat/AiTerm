@@ -205,7 +205,11 @@ _parse_provider_response() {
             parsed_text=$(echo "$raw_response" | jq -r '.candidates[0].content.parts[0].text // ""' 2>/dev/null)
             ;;
         "ollama"|"ollama_remote")
-            parsed_text=$(echo "$raw_response" | jq -r '.response // ""' 2>/dev/null)
+            # Ollama için önce response'a bak, boşsa thinking (reasoning modeller) alanına bak
+            parsed_text=$(echo "$raw_response" | jq -r '.response // empty' 2>/dev/null)
+            if [[ -z "$parsed_text" || "$parsed_text" == "null" ]]; then
+                parsed_text=$(echo "$raw_response" | jq -r '.thinking // empty' 2>/dev/null)
+            fi
             ;;
         "openai")
             parsed_text=$(echo "$raw_response" | jq -r '.choices[0].message.content // ""' 2>/dev/null)
@@ -215,33 +219,40 @@ _parse_provider_response() {
             ;;
     esac
     
-    # Fallback: if parsed_text is empty and raw_response is valid JSON error or just text
-    if [[ -z "$parsed_text" ]]; then
+    # Fallback: Eğer provider'a özel extraction boş döndüyse, ham response'u kullan
+    if [[ -z "$parsed_text" || "$parsed_text" == "null" ]]; then
         parsed_text="$raw_response"
     fi
     
-    # JSON içinden asıl veriyi çek
-    local extracted_json="$parsed_text"
-    if [[ "$(whence -w _extract_json_from_response 2>/dev/null)" == *function* ]]; then
-        extracted_json=$(_extract_json_from_response "$parsed_text")
+    # === FOOLPROOF JSON EXTRACTION ===
+    # Çıkan metin içinde hedeflenen alanı arayan sağlam bir Perl regex'i
+    local perl_extracted=$(echo "$parsed_text" | perl -0777 -ne '
+        if (/\\?"('"$mode"')\\?"\s*:\s*\\?"(.*?)(?<!\\)\\?"/s) { print $2; }
+        elsif (/\\?"('"$mode"')\\?"\s*:\s*\\?"(.*)/s) { print $2; }
+    ')
+    
+    if [[ -n "$perl_extracted" ]]; then
+        # Kaçış karakterlerini temizle
+        parsed_text=$(echo "$perl_extracted" | perl -pe 's/\\n/\n/g; s/\\"/"/g; s/\\\\/\\/g')
+        echo "$parsed_text"
+        return 0
     fi
-
-    if echo "$extracted_json" | jq . >/dev/null 2>&1; then
+    
+    # Regex bulamazsa normal jq ile deneyelim
+    if echo "$parsed_text" | jq -e . >/dev/null 2>&1; then
         local content=""
         if [[ "$mode" == "explanation" ]]; then
-            content=$(echo "$extracted_json" | jq -r '.explanation // .command // .response // empty' 2>/dev/null)
+            content=$(echo "$parsed_text" | jq -r '.explanation // .command // .response // empty' 2>/dev/null)
         else
-            content=$(echo "$extracted_json" | jq -r '.command // .explanation // .response // empty' 2>/dev/null)
+            content=$(echo "$parsed_text" | jq -r '.command // .explanation // .response // empty' 2>/dev/null)
         fi
         
         if [[ -n "$content" && "$content" != "null" ]]; then
             echo "$content"
         else
-            # JSON ama istenen alanlar yoksa ham text'i dön (veya tüm JSON'ı)
             echo "$parsed_text"
         fi
     else
-        # JSON değilse ham text'i dön
         echo "$parsed_text"
     fi
 }

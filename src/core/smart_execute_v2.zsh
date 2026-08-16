@@ -177,6 +177,10 @@ B) AÇIKLAMA MODU (Kullanıcı açıklama veya yardım istiyor):
    Format: {"explanation":"detaylı_aciklama_metni"}
    Örnek: {"explanation":"find komutu dosya aramak için kullanılır. -name parametresi dosya adını eşleştirir."}
 
+C) SOHBET MODU (Kullanıcı doğrudan LLM ile sohbet etmek, soru sormak veya bir çıktıyı yorumlatmak istiyor):
+   Format: {"chat":"detayli_sohbet_cevabi"}
+   Örnek: {"chat":"Merhaba! Sorunuzun cevabı şu şekildedir..."}
+
 GÜVENLİK VE TEHLİKELİ İSTEKLER:
 Aşağıdaki durumlarda mutlaka {"command":"DANGER"} yanıtı vermelisin:
 - Sistem dosyalarını silmeye veya bozmaya yönelik yıkıcı komutlar (örn: rm -rf /, dd, vb.)
@@ -209,6 +213,10 @@ A) COMMAND MODE (User wants a command/action):
 B) EXPLANATION MODE (User wants explanation or help):
    Format: {"explanation":"detailed_explanation_text"}
    Example: {"explanation":"The find command is used to search for files. The -name parameter matches the filename pattern."}
+
+C) CHAT MODE (User wants to chat, ask a question, or discuss an output):
+   Format: {"chat":"detailed_chat_response"}
+   Example: {"chat":"Hello! Here is the answer to your question..."}
 
 SECURITY AND DANGEROUS REQUESTS:
 You must respond with {"command":"DANGER"} under the following conditions:
@@ -275,7 +283,7 @@ _extract_json_from_response() {
     fi
     
     # regex ile en dıştaki { ... } ayıkla
-    json_block=$(echo "$raw_output" | grep -o '\{.*\}' | tail -n 1)
+    json_block=$(echo "$raw_output" | grep -o '{.*}' | tail -n 1)
     if [[ -n "$json_block" ]] && echo "$json_block" | jq -e . >/dev/null 2>&1; then
         echo "$json_block"
         return 0
@@ -316,7 +324,13 @@ _get_enhanced_prompt() {
     system_msg="${system_msg/__HISTORY_INFO__/$history_info}"
     
     local mode_instruction=""
-    if [[ "$mode" == "explanation" ]]; then
+    if [[ "$mode" == "chat" ]]; then
+        if [[ "$lang" == "tr" ]]; then
+            mode_instruction=$'\nKullanıcı doğrudan sohbet ediyor. {"chat": "..."} formatında yanıt ver.'
+        else
+            mode_instruction=$'\nUser is chatting directly. Respond in {"chat": "..."} format.'
+        fi
+    elif [[ "$mode" == "explanation" ]]; then
         if [[ "$lang" == "tr" ]]; then
             mode_instruction=$'\nKullanıcı bir komutun açıklamasını istiyor. {"explanation": "..."} formatında yanıt ver.'
         else
@@ -536,31 +550,30 @@ _call_llm() {
     if [[ "$fallback_used" == "true" ]]; then
         response_field="$response"
     else
-        # Önce response field'ını al
-        if echo "$response" | jq . >/dev/null 2>&1; then
-            response_field=$(echo "$response" | jq -r '.response // ""' 2>/dev/null)
-        fi
+        # === JSON AYIKLAMA (FOOLPROOF) ===
+        # Ollama'dan gelen reasoning (düşünme) modelleri bazen JSON yapısını bozar
+        # veya "thinking" alanı içerisine gömülü JSON döndürür. Ve token limiti aşılırsa JSON kesilir.
+        # Tüm bu durumlarla başa çıkmak için doğrudan regex ile hedef alanı (explanation, command, chat) ayıklıyoruz.
         
-        # Eğer response field boş ise ham response'u kullan
-        if [[ -z "$response_field" || "$response_field" == "null" ]]; then
-            response_field="$response"
-        fi
+        local perl_extracted=$(echo "$response" | perl -0777 -ne '
+            # "explanation": "..." veya \"explanation\": \"...\" gibi durumları yakala
+            if (/\\?"('"$mode"')\\?"\s*:\s*\\?"(.*?)(?<!\\)\\?"/s) { print $2; }
+            # Kesik JSON ise sonuna kadar al
+            elsif (/\\?"('"$mode"')\\?"\s*:\s*\\?"(.*)/s) { print $2; }
+        ')
         
-        # Gelişmiş JSON Extractor ile JSON'ı ayıkla ve doğrula
-        local inner_json=""
-        inner_json=$(_extract_json_from_response "$response_field")
-        
-        if [[ $? -eq 0 && -n "$inner_json" ]]; then
-            if [[ "$mode" == "explanation" ]]; then
-                local explanation=$(echo "$inner_json" | jq -r '.explanation // empty' 2>/dev/null)
-                if [[ -n "$explanation" && "$explanation" != "null" ]]; then
-                    response_field="$explanation"
+        if [[ -n "$perl_extracted" ]]; then
+            # Kaçış karakterlerini temizle (nested JSON stringleri için)
+            response_field=$(echo "$perl_extracted" | perl -pe 's/\\n/\n/g; s/\\"/"/g; s/\\\\/\\/g')
+        else
+            # Regex bulamadıysa, belki model direkt metin döndürmüştür, ya da standart jq ile deneyelim
+            if echo "$response" | jq . >/dev/null 2>&1; then
+                response_field=$(echo "$response" | jq -r '.'"$mode"' // empty' 2>/dev/null)
+                if [[ -z "$response_field" || "$response_field" == "null" ]]; then
+                    response_field=$(echo "$response" | jq -r '.response // empty' 2>/dev/null)
                 fi
-            else
-                local command=$(echo "$inner_json" | jq -r '.command // empty' 2>/dev/null)
-                if [[ -n "$command" && "$command" != "null" ]]; then
-                    response_field="$command"
-                fi
+                echo -e "\n\e[31m❌ Hata: LLM geçersiz veya eksik bir JSON döndürdü.\e[0m" >&2
+                return 1
             fi
         fi
     fi
@@ -646,8 +659,42 @@ smart_accept_line() {
         return
     fi
 
-    # Mod belirleme
-    if [[ "$original_command" == @\?* ]]; then
+    # Mod belirleme ve Pipe yakalama
+    local piped_output=""
+    
+    # Eğer komut içinde "| @@" varsa (Pipe to Chat)
+    if [[ "$original_command" == *"| @@"* ]] || [[ "$original_command" == *"|@@"* ]]; then
+        mode="chat"
+        # Komutu '| @@' (veya '|@@') noktasından böl
+        local pre_pipe
+        local post_pipe
+        if [[ "$original_command" == *"| @@"* ]]; then
+            pre_pipe="${original_command%%| @@*}"
+            post_pipe="${original_command#*| @@}"
+        else
+            pre_pipe="${original_command%%|@@*}"
+            post_pipe="${original_command#*|@@}"
+        fi
+        
+        # Ön kısımdaki komutu çalıştır ve çıktısını al
+        echo -n $'\n\e[2m⏳ Komut çalıştırılıyor ve çıktısı alınıyor...\e[0m' >&2
+        # Komutu arkaplanda çalıştırıp stderr'i yoksayarak çıktıyı 4KB ile sınırla (bağlam büyümesin diye)
+        piped_output=$(eval "$pre_pipe" 2>/dev/null | head -c 4096)
+        echo -ne "\r\e[K" >&2
+        
+        # Eğer çıktı yoksa bilgi ver
+        if [[ -z "$piped_output" ]]; then
+            piped_output="(Komut boş çıktı döndürdü)"
+        fi
+        
+        user_command="${post_pipe}"
+        # Chat promptunun sonuna çıktıyı ekle
+        user_command="${user_command}\n\n[ÇALIŞTIRILAN KOMUT]: ${pre_pipe}\n[KOMUT ÇIKTISI]:\n${piped_output}"
+        
+    elif [[ "$original_command" == @@* ]]; then
+        mode="chat"
+        user_command="${original_command#@@}"
+    elif [[ "$original_command" == @\?* ]]; then
         mode="explanation"
         user_command="${original_command#@?}"
     elif [[ "$original_command" == @* ]]; then
@@ -714,6 +761,20 @@ smart_accept_line() {
         else
             echo -e "\n\e[1;34m🧠 Açıklama:\e[0m\n$llm_response"
             _smart_log "EXPLANATION_SUCCESS" "Request: $user_command"
+        fi
+        BUFFER=""
+        zle redisplay
+        return
+    fi
+
+    # Sohbet (Chat) modu
+    if [[ "$mode" == "chat" ]]; then
+        if [[ -z "$llm_response" || "$llm_response" == "DANGER" ]]; then
+            echo -e "\n\e[31m❌ Hata: Sohbet yanıtı alınamadı veya istek tehlikeli bulundu.\e[0m"
+            _smart_log "CHAT_ERROR" "Response: $llm_response"
+        else
+            echo -e "\n\e[1;36m💬 Sohbet:\e[0m\n$llm_response"
+            _smart_log "CHAT_SUCCESS" "Request: $user_command"
         fi
         BUFFER=""
         zle redisplay

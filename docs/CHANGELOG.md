@@ -1,5 +1,21 @@
 # Changelog - Smart Execute v2.0
 
+## v2.0.3 - Foolproof JSON Parsing ve Reasoning Model Desteği (2026-08-16)
+
+### ✅ Durum: ÜRETİM İÇİN HAZIR (STABLE)
+Bu sürüm, Ollama'nın "reasoning" modellerinin (örn. qwen3.5:2b) hatalı veya eksik JSON üretmesi durumunda sistemin çökmesini engelleyen devrim niteliğinde bir regex katmanı içerir.
+
+### 🚀 Yeni Özellikler ve İyileştirmeler
+
+#### Foolproof JSON Parser (Perl Regex Katmanı)
+* LLM tarafından kesilmiş (truncated) veya eksik dönmüş JSON yapılarını çökmeden ayrıştırabilen güçlü bir Perl regex motoru entegre edildi.
+* Multi-provider modülü (`providers.zsh`) içerisindeki JSON ayrıştırma sorunları kökünden çözüldü. Terminale bir daha asla ham JSON veya "context" bloğu sızmayacak.
+
+#### Reasoning Modellerle Gelişmiş Uyum
+* Qwen3.5:2b gibi modellerin, yanıtı JSON'un `response` alanı yerine `thinking` alanına gömmesi durumlarına karşı tam destek sağlandı.
+
+---
+
 ## v2.0.2 - Gelişmiş Dinamik Prompt ve Çevre Bağlamı Entegrasyonu (2026-05-30)
 
 ### ✅ Durum: ÜRETİM İÇİN HAZIR (STABLE)
